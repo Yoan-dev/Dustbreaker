@@ -1,15 +1,18 @@
 using UnityEngine;
 using Unity.Entities;
 
-[DisallowMultipleComponent]
-public class PlayerAuthoring : MonoBehaviour
+namespace Dustbreaker
 {
-	public class Baker : Baker<PlayerAuthoring>
+	[DisallowMultipleComponent]
+	public class PlayerAuthoring : MonoBehaviour
 	{
-		public override void Bake(PlayerAuthoring authoring)
+		public class Baker : Baker<PlayerAuthoring>
 		{
-			Entity entity = GetEntity(TransformUsageFlags.None);
-			AddComponent<PlayerInputs>(entity);
+			public override void Bake(PlayerAuthoring authoring)
+			{
+				Entity entity = GetEntity(TransformUsageFlags.None);
+				AddComponent<PlayerInputs>(entity);
+			}
 		}
 	}
 }

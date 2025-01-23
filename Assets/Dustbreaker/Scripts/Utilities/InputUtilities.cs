@@ -1,21 +1,24 @@
-public struct FixedInputEvent
+namespace Dustbreaker
 {
-	private byte _wasEverSet;
-	private uint _lastSetTick;
-
-	public void Set(uint tick)
+	public struct FixedInputEvent
 	{
-		_lastSetTick = tick;
-		_wasEverSet = 1;
-	}
+		private byte _wasEverSet;
+		private uint _lastSetTick;
 
-	public bool IsSet(uint tick)
-	{
-		if (_wasEverSet == 1)
+		public void Set(uint tick)
 		{
-			return tick == _lastSetTick;
+			_lastSetTick = tick;
+			_wasEverSet = 1;
 		}
 
-		return false;
+		public bool IsSet(uint tick)
+		{
+			if (_wasEverSet == 1)
+			{
+				return tick == _lastSetTick;
+			}
+
+			return false;
+		}
 	}
 }

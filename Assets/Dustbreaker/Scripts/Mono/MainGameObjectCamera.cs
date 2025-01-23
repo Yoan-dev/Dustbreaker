@@ -1,11 +1,14 @@
 using UnityEngine;
 
-public class MainGameObjectCamera : MonoBehaviour
+namespace Dustbreaker
 {
-	public static Camera Instance;
-
-	void Awake()
+	public class MainGameObjectCamera : MonoBehaviour
 	{
-		Instance = GetComponent<UnityEngine.Camera>();
+		public static Camera Instance;
+
+		void Awake()
+		{
+			Instance = GetComponent<Camera>();
+		}
 	}
 }

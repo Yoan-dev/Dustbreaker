@@ -3,45 +3,48 @@ using Unity.Mathematics;
 using UnityEngine;
 using Unity.CharacterController;
 
-[DisallowMultipleComponent]
-public class CharacterAuthoring : MonoBehaviour
+namespace Dustbreaker
 {
-	public GameObject ViewEntity;
-	public AuthoringKinematicCharacterProperties CharacterProperties = AuthoringKinematicCharacterProperties.GetDefault();
-
-	public float GroundMaxSpeed = 10f;
-	public float GroundedMovementSharpness = 15f;
-	public float AirDrag = 0f;
-	public float JumpSpeed = 10f;
-	public float3 Gravity = math.up() * -30f;
-	public BasicStepAndSlopeHandlingParameters StepAndSlopeHandling = BasicStepAndSlopeHandlingParameters.GetDefault();
-	public float MinViewAngle = -90f;
-	public float MaxViewAngle = 90f;
-
-	public class Baker : Baker<CharacterAuthoring>
+	[DisallowMultipleComponent]
+	public class CharacterAuthoring : MonoBehaviour
 	{
-		public override void Bake(CharacterAuthoring authoring)
+		public GameObject ViewEntity;
+		public AuthoringKinematicCharacterProperties CharacterProperties = AuthoringKinematicCharacterProperties.GetDefault();
+
+		public float GroundMaxSpeed = 10f;
+		public float GroundedMovementSharpness = 15f;
+		public float AirDrag = 0f;
+		public float JumpSpeed = 10f;
+		public float3 Gravity = math.up() * -30f;
+		public BasicStepAndSlopeHandlingParameters StepAndSlopeHandling = BasicStepAndSlopeHandlingParameters.GetDefault();
+		public float MinViewAngle = -90f;
+		public float MaxViewAngle = 90f;
+
+		public class Baker : Baker<CharacterAuthoring>
 		{
-			KinematicCharacterUtilities.BakeCharacter(this, authoring.gameObject, authoring.CharacterProperties);
-
-			Entity entity = GetEntity(TransformUsageFlags.Dynamic | TransformUsageFlags.WorldSpace);
-
-			AddComponent(entity, new CharacterComponent
+			public override void Bake(CharacterAuthoring authoring)
 			{
-				GroundMaxSpeed = authoring.GroundMaxSpeed,
-				GroundedMovementSharpness = authoring.GroundedMovementSharpness,
-				AirDrag = authoring.AirDrag,
-				JumpSpeed = authoring.JumpSpeed,
-				Gravity = authoring.Gravity,
-				StepAndSlopeHandling = authoring.StepAndSlopeHandling,
-				MinViewAngle = authoring.MinViewAngle,
-				MaxViewAngle = authoring.MaxViewAngle,
+				KinematicCharacterUtilities.BakeCharacter(this, authoring.gameObject, authoring.CharacterProperties);
 
-				ViewEntity = GetEntity(authoring.ViewEntity, TransformUsageFlags.Dynamic),
-				ViewPitchDegrees = 0f,
-				ViewLocalRotation = quaternion.identity,
-			});
-			AddComponent(entity, new CharacterControl());
+				Entity entity = GetEntity(TransformUsageFlags.Dynamic | TransformUsageFlags.WorldSpace);
+
+				AddComponent(entity, new CharacterComponent
+				{
+					GroundMaxSpeed = authoring.GroundMaxSpeed,
+					GroundedMovementSharpness = authoring.GroundedMovementSharpness,
+					AirDrag = authoring.AirDrag,
+					JumpSpeed = authoring.JumpSpeed,
+					Gravity = authoring.Gravity,
+					StepAndSlopeHandling = authoring.StepAndSlopeHandling,
+					MinViewAngle = authoring.MinViewAngle,
+					MaxViewAngle = authoring.MaxViewAngle,
+
+					ViewEntity = GetEntity(authoring.ViewEntity, TransformUsageFlags.Dynamic),
+					ViewPitchDegrees = 0f,
+					ViewLocalRotation = quaternion.identity,
+				});
+				AddComponent(entity, new CharacterControl());
+			}
 		}
 	}
 }

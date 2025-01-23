@@ -1,5 +1,8 @@
 using System;
 using Unity.Entities;
 
-[Serializable]
-public struct MainEntityCameraTag : IComponentData { }
+namespace Dustbreaker
+{
+	[Serializable]
+	public struct MainEntityCameraTag : IComponentData { }
+}
