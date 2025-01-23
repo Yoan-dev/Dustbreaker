@@ -15,9 +15,9 @@ MonoBehaviour:
   m_CategoryNames:
   - Terrain
   - Character
-  - 
-  - 
-  - 
+  - Item
+  - Interactable
+  - Raycast
   - 
   - 
   - 
