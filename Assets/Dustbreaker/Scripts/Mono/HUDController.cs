@@ -15,11 +15,11 @@ namespace Dustbreaker
 			Instance = this;
 		}
 
-		public void UpdateHUD(Action firstInteraction, Action secondInteraction)
+		public void UpdateHUD(Action primaryInteraction, Action secondaryInteraction)
 		{
 			InteractionText.text =
-				(firstInteraction == Action.None ? "" : "(E) " + firstInteraction.ToString() + "\n") +
-				(secondInteraction == Action.None ? "" : "(F) " + secondInteraction.ToString());
+				(primaryInteraction == Action.None ? "" : "(E) " + primaryInteraction.ToString() + "\n") +
+				(secondaryInteraction == Action.None ? "" : "(F) " + secondaryInteraction.ToString());
 		}
 	}
 }

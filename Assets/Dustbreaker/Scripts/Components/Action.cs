@@ -15,6 +15,7 @@ namespace Dustbreaker
 	public struct InteractionController : IComponentData
 	{
 		public Entity Target;
+		public Action Interaction;
 	}
 
 	public struct InteractionFlag : IComponentData, IEnableableComponent { }
@@ -23,19 +24,18 @@ namespace Dustbreaker
 	public struct InteractableComponent : IComponentData
 	{
 		public Action Actions;
-		public float Range;
 
 		public bool HasAction(Action action)
 		{
 			return (Actions & action) != 0;
 		}
 
-		public Action GetFirstInteraction()
+		public Action GetPrimaryInteraction()
 		{
 			return HasAction(Action.Use) ? Action.Use : Action.None;
 		}
 
-		public Action GetSecondInteraction()
+		public Action GetSecondaryInteraction()
 		{
 			return HasAction(Action.Pick) ? Action.Pick : Action.None;
 		}

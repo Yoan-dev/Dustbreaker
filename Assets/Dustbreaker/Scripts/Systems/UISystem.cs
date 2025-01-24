@@ -14,20 +14,22 @@ namespace Dustbreaker
 
 		public void OnUpdate(ref SystemState state)
 		{
+			state.Dependency.Complete();
+
 			// we assume there is only one interaction controller
 			InteractionController interactionController = SystemAPI.GetSingleton<InteractionController>();
 
-			Action firstInteraction = Action.None;
-			Action secondInteraction = Action.None;
+			Action primaryInteraction = Action.None;
+			Action secondaryInteraction = Action.None;
 
 			if (interactionController.Target != Entity.Null)
 			{
 				InteractableComponent interactable = SystemAPI.GetComponent<InteractableComponent>(interactionController.Target);
-				firstInteraction = interactable.GetFirstInteraction();
-				secondInteraction = interactable.GetSecondInteraction();
+				primaryInteraction = interactable.GetPrimaryInteraction();
+				secondaryInteraction = interactable.GetSecondaryInteraction();
 			}
 
-			HUDController.Instance.UpdateHUD(firstInteraction, secondInteraction);
+			HUDController.Instance.UpdateHUD(primaryInteraction, secondaryInteraction);
 		}
 	}
 }

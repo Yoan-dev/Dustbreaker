@@ -50,7 +50,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Interactable:
     Actions: 6
-    Range: 1
 --- !u!33 &6477020496194185386
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -206,7 +205,7 @@ MonoBehaviour:
         Category01: 1
         Category02: 0
         Category03: 0
-        Category04: 0
+        Category04: 1
         Category05: 0
         Category06: 0
         Category07: 0

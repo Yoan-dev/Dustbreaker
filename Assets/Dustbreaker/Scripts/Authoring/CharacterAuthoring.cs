@@ -19,6 +19,7 @@ namespace Dustbreaker
 		public BasicStepAndSlopeHandlingParameters StepAndSlopeHandling = BasicStepAndSlopeHandlingParameters.GetDefault();
 		public float MinViewAngle = -90f;
 		public float MaxViewAngle = 90f;
+		public float InteractionRange = 1.5f;
 
 		public class Baker : Baker<CharacterAuthoring>
 		{
@@ -42,6 +43,8 @@ namespace Dustbreaker
 					ViewEntity = GetEntity(authoring.ViewEntity, TransformUsageFlags.Dynamic),
 					ViewPitchDegrees = 0f,
 					ViewLocalRotation = quaternion.identity,
+
+					InteractionRange = authoring.InteractionRange,
 				});
 				AddComponent(entity, new CharacterControl());
 			}

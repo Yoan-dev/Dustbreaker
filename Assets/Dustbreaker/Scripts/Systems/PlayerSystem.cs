@@ -5,6 +5,7 @@ using Unity.Transforms;
 using UnityEngine;
 using Unity.CharacterController;
 using UnityEngine.InputSystem;
+using Unity.Physics;
 
 namespace Dustbreaker
 {
@@ -60,6 +61,16 @@ namespace Dustbreaker
 				{
 					playerInputs.ValueRW.JumpPressed.Set(tick);
 				}
+
+				if (Input.GetKeyDown(KeyCode.E))
+				{
+					playerInputs.ValueRW.PrimaryInteractionPressed.Set(tick);
+				}
+
+				if (Input.GetKeyDown(KeyCode.F))
+				{
+					playerInputs.ValueRW.SecondaryInteractionPressed.Set(tick);
+				}
 			}
 		}
 	}
@@ -96,19 +107,29 @@ namespace Dustbreaker
 	[BurstCompile]
 	public partial struct PlayerFixedStepControlSystem : ISystem
 	{
+		private CollisionFilter _interactionFilter;
+
 		[BurstCompile]
 		public void OnCreate(ref SystemState state)
 		{
 			state.RequireForUpdate<FixedTickSystem.Singleton>();
 			state.RequireForUpdate(SystemAPI.QueryBuilder().WithAll<PlayerInputs>().WithAllRW<CharacterControl>().Build());
+
+			_interactionFilter = new CollisionFilter
+			{
+				BelongsTo = 1 << 4, // Raycast
+				CollidesWith = 1 << 3, // Interactable
+			};
 		}
 
 		[BurstCompile]
 		public void OnUpdate(ref SystemState state)
 		{
 			uint tick = SystemAPI.GetSingleton<FixedTickSystem.Singleton>().Tick;
+			CollisionWorld collisionWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
 
-			foreach (var (playerInputs, localTransform, characterControlRW, entity) in SystemAPI.Query<PlayerInputs, LocalTransform, RefRW<CharacterControl>>().WithAll<Simulate>().WithEntityAccess())
+			// Movement
+			foreach (var (playerInputs, localTransform, characterControlRW) in SystemAPI.Query<PlayerInputs, LocalTransform, RefRW<CharacterControl>>().WithAll<Simulate>())
 			{
 				ref CharacterControl characterControl = ref characterControlRW.ValueRW;
 				quaternion characterRotation = localTransform.Rotation;
@@ -121,6 +142,54 @@ namespace Dustbreaker
 
 				// Jump
 				characterControl.Jump = playerInputs.JumpPressed.IsSet(tick);
+			}
+
+			// Interaction
+			foreach (var (playerInputs, character, interactionControllerRW, interactionFlagRW) in 
+				SystemAPI.Query<PlayerInputs, CharacterComponent, RefRW<InteractionController>, EnabledRefRW<InteractionFlag>>().WithPresent<InteractionFlag>().WithAll<Simulate>())
+			{
+				ref InteractionController interactionController = ref interactionControllerRW.ValueRW;
+				LocalToWorld viewLocalToWorld = SystemAPI.GetComponent<LocalToWorld>(character.ViewEntity);
+				float3 start = viewLocalToWorld.Position;
+				float3 end = start + viewLocalToWorld.Forward * character.InteractionRange;
+
+				RaycastInput raycastInput = new RaycastInput
+				{
+					Start = start,
+					End = end,
+					Filter = _interactionFilter,
+				};
+				
+				if (collisionWorld.CastRay(raycastInput, out Unity.Physics.RaycastHit closestHit))
+				{
+					// target detection
+					interactionController.Target = closestHit.Entity;
+
+					// we assume the target has an interactable component
+					InteractableComponent interactable = SystemAPI.GetComponent<InteractableComponent>(interactionController.Target);
+
+					if (playerInputs.PrimaryInteractionPressed.IsSet(tick))
+					{
+						interactionController.Interaction = interactable.GetPrimaryInteraction();
+					}
+					else if (playerInputs.SecondaryInteractionPressed.IsSet(tick))
+					{
+						interactionController.Interaction = interactable.GetSecondaryInteraction();
+					}
+
+					// trigger interaction
+					if (interactionController.Interaction != Action.None)
+					{
+						interactionFlagRW.ValueRW = true;
+						Debug.Log(interactionController.Interaction.ToString());
+					}
+				}
+				else
+				{
+					interactionController.Target = Entity.Null;
+					interactionController.Interaction = Action.None;
+					interactionFlagRW.ValueRW = false;
+				}
 			}
 		}
 	}

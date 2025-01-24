@@ -182,6 +182,7 @@ MonoBehaviour:
     ConstrainVelocityToGroundPlane: 1
   MinViewAngle: -90
   MaxViewAngle: 90
+  InteractionRange: 1.5
 --- !u!114 &-4202127508360882810
 MonoBehaviour:
   m_ObjectHideFlags: 0

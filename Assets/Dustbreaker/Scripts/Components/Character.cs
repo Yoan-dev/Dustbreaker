@@ -21,6 +21,8 @@ namespace Dustbreaker
 		public Entity ViewEntity;
 		public float ViewPitchDegrees;
 		public quaternion ViewLocalRotation;
+
+		public float InteractionRange;
 	}
 
 	[Serializable]
