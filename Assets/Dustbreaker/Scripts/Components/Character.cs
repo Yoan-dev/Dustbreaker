@@ -3,6 +3,8 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.CharacterController;
 
+// based on Character Controller-Standard Characters (see: LICENSE)
+
 namespace Dustbreaker
 {
 	[Serializable]

@@ -28,6 +28,8 @@ namespace Dustbreaker
 
 				if (actionEvent.Action == Action.Pick)
 				{
+					// TODO: set carried item render in front
+
 					state.EntityManager.SetComponentData(actionEvent.Source, new CarryComponent { Entity = actionEvent.Target });
 					state.EntityManager.SetComponentData(actionEvent.Target, new PickableComponent { Entity = actionEvent.Source });
 					state.EntityManager.SetComponentEnabled<CarryComponent>(actionEvent.Source, true);
@@ -64,6 +66,8 @@ namespace Dustbreaker
 				}
 				else if (actionEvent.Action == Action.Drop)
 				{
+					// TODO: find safe drop position
+
 					state.EntityManager.SetComponentData(actionEvent.Source, new CarryComponent { Entity = Entity.Null });
 					state.EntityManager.SetComponentData(actionEvent.Target, new PickableComponent { Entity = Entity.Null });
 					state.EntityManager.SetComponentEnabled<CarryComponent>(actionEvent.Source, false);

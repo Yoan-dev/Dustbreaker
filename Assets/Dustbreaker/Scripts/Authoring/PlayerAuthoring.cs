@@ -13,6 +13,9 @@ namespace Dustbreaker
 				Entity entity = GetEntity(TransformUsageFlags.Dynamic);
 				AddComponent<PlayerInputs>(entity);
 				AddComponent<PlayerTag>(entity);
+
+				// temp
+				AddComponent<VehicleInputs>(entity);
 			}
 		}
 	}

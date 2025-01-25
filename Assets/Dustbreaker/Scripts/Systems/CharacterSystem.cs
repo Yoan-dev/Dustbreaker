@@ -6,6 +6,8 @@ using Unity.Transforms;
 using Unity.CharacterController;
 using Unity.Burst.Intrinsics;
 
+// based on Character Controller-Standard Characters (see: LICENSE)
+
 namespace Dustbreaker
 {
 	[UpdateInGroup(typeof(KinematicCharacterPhysicsUpdateGroup))]

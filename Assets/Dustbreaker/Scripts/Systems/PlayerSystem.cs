@@ -7,6 +7,8 @@ using Unity.CharacterController;
 using UnityEngine.InputSystem;
 using Unity.Physics;
 
+// based on Character Controller-Standard Characters (see: LICENSE)
+
 namespace Dustbreaker
 {
 	[UpdateInGroup(typeof(InitializationSystemGroup))]
@@ -76,6 +78,20 @@ namespace Dustbreaker
 				{
 					playerInputs.ValueRW.DropPressed.Set(tick);
 				}
+			}
+
+			// vehicle (temp)
+			foreach (var vehicleInputs in SystemAPI.Query<RefRW<VehicleInputs>>())
+			{
+				if (_ignoreInput)
+				{
+					vehicleInputs.ValueRW.Steering = 0f;
+					vehicleInputs.ValueRW.Throttle = 0f;
+					continue;
+				}
+
+				vehicleInputs.ValueRW.Steering = (Input.GetKey(KeyCode.RightArrow) ? 1f : 0f) + (Input.GetKey(KeyCode.LeftArrow) ? -1f : 0f);
+				vehicleInputs.ValueRW.Throttle = (Input.GetKey(KeyCode.UpArrow) ? 1f : 0f) + (Input.GetKey(KeyCode.DownArrow) ? -1f : 0f);
 			}
 		}
 	}

@@ -1,6 +1,8 @@
 using Unity.Burst;
 using Unity.Entities;
 
+// based on Character Controller-Standard Characters (see: LICENSE)
+
 namespace Dustbreaker
 {
 	[UpdateInGroup(typeof(FixedStepSimulationSystemGroup), OrderLast = true)]

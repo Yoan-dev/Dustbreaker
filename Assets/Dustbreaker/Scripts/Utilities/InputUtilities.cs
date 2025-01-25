@@ -1,3 +1,5 @@
+// based on Character Controller-Standard Characters (see: LICENSE)
+
 namespace Dustbreaker
 {
 	public struct FixedInputEvent

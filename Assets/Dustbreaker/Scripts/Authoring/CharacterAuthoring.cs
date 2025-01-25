@@ -3,6 +3,8 @@ using Unity.Mathematics;
 using UnityEngine;
 using Unity.CharacterController;
 
+// based on Character Controller-Standard Characters (see: LICENSE)
+
 namespace Dustbreaker
 {
 	[DisallowMultipleComponent]

@@ -1,6 +1,8 @@
 using Unity.Entities;
 using UnityEngine;
 
+// based on Character Controller-Standard Characters (see: LICENSE)
+
 namespace Dustbreaker
 {
 	[DisallowMultipleComponent]

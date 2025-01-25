@@ -1,6 +1,8 @@
 using Unity.Mathematics;
 using Unity.CharacterController;
 
+// based on Character Controller-Standard Characters (see: LICENSE)
+
 namespace Dustbreaker
 {
 	public static class CharacterUtilities
