@@ -22,7 +22,7 @@ namespace Dustbreaker
 			Action primaryInteraction = Action.None;
 			Action secondaryInteraction = Action.None;
 
-			if (interactionController.Target != Entity.Null)
+			if (interactionController.Interaction == Action.None && interactionController.Target != Entity.Null)
 			{
 				InteractableComponent interactable = SystemAPI.GetComponent<InteractableComponent>(interactionController.Target);
 				primaryInteraction = interactable.GetPrimaryInteraction();

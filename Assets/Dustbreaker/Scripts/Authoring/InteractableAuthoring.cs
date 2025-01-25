@@ -14,6 +14,12 @@ namespace Dustbreaker
 			{
 				Entity entity = GetEntity(TransformUsageFlags.Dynamic);
 				AddComponent(entity, authoring.Interactable);
+
+				if (authoring.Interactable.HasAction(Action.Pick))
+				{
+					AddComponent<PickableComponent>(entity);
+					SetComponentEnabled<PickableComponent>(entity, false);
+				}
 			}
 		}
 	}

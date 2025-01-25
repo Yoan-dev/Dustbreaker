@@ -12,6 +12,7 @@ namespace Dustbreaker
 		public FixedInputEvent JumpPressed;
 		public FixedInputEvent PrimaryInteractionPressed;
 		public FixedInputEvent SecondaryInteractionPressed;
+		public FixedInputEvent DropPressed;
 	}
 
 	public struct PlayerTag : IComponentData { }

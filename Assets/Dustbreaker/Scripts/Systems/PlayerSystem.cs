@@ -71,6 +71,11 @@ namespace Dustbreaker
 				{
 					playerInputs.ValueRW.SecondaryInteractionPressed.Set(tick);
 				}
+
+				if (Input.GetKeyDown(KeyCode.G))
+				{
+					playerInputs.ValueRW.DropPressed.Set(tick);
+				}
 			}
 		}
 	}
@@ -145,8 +150,8 @@ namespace Dustbreaker
 			}
 
 			// Interaction
-			foreach (var (playerInputs, character, interactionControllerRW, interactionFlagRW) in 
-				SystemAPI.Query<PlayerInputs, CharacterComponent, RefRW<InteractionController>, EnabledRefRW<InteractionFlag>>().WithPresent<InteractionFlag>().WithAll<Simulate>())
+			foreach (var (playerInputs, character, carry, interactionControllerRW, interactionFlagRW) in 
+				SystemAPI.Query<PlayerInputs, CharacterComponent, CarryComponent, RefRW<InteractionController>, EnabledRefRW<InteractionFlag>>().WithPresent<InteractionFlag, CarryComponent>().WithAll<Simulate>())
 			{
 				ref InteractionController interactionController = ref interactionControllerRW.ValueRW;
 				LocalToWorld viewLocalToWorld = SystemAPI.GetComponent<LocalToWorld>(character.ViewEntity);
@@ -159,10 +164,15 @@ namespace Dustbreaker
 					End = end,
 					Filter = _interactionFilter,
 				};
-				
-				if (collisionWorld.CastRay(raycastInput, out Unity.Physics.RaycastHit closestHit))
+
+				if (playerInputs.DropPressed.IsSet(tick) && carry.Entity != Entity.Null)
 				{
-					// target detection
+					interactionController.Target = carry.Entity;
+					interactionController.Interaction = Action.Drop;
+					interactionFlagRW.ValueRW = true;
+				}
+				else if (collisionWorld.CastRay(raycastInput, out Unity.Physics.RaycastHit closestHit) && closestHit.Entity != carry.Entity)
+				{
 					interactionController.Target = closestHit.Entity;
 
 					// we assume the target has an interactable component
@@ -171,15 +181,11 @@ namespace Dustbreaker
 					if (playerInputs.PrimaryInteractionPressed.IsSet(tick))
 					{
 						interactionController.Interaction = interactable.GetPrimaryInteraction();
+						interactionFlagRW.ValueRW = true;
 					}
 					else if (playerInputs.SecondaryInteractionPressed.IsSet(tick))
 					{
 						interactionController.Interaction = interactable.GetSecondaryInteraction();
-					}
-
-					// trigger interaction
-					if (interactionController.Interaction != Action.None)
-					{
 						interactionFlagRW.ValueRW = true;
 					}
 				}

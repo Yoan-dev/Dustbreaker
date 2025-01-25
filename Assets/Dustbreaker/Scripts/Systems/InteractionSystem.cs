@@ -36,25 +36,25 @@ namespace Dustbreaker
 				BufferLookup = SystemAPI.GetBufferLookup<ActionEvent>(),
 			}.Schedule(state.Dependency);
 		}
-	}
 
-    [BurstCompile]
-    public partial struct InteractionJob : IJobEntity
-	{
-		public NativeQueue<ActionEvent>.ParallelWriter ActionQueue;
-
-		public void Execute(Entity entity, ref InteractionController interactionController, EnabledRefRW<InteractionFlag> interactionFlag)
+		[BurstCompile]
+		public partial struct InteractionJob : IJobEntity
 		{
-			ActionQueue.Enqueue(new ActionEvent
-			{
-				Source = entity,
-				Target = interactionController.Target,
-				Action = interactionController.Interaction,
-			});
+			public NativeQueue<ActionEvent>.ParallelWriter ActionQueue;
 
-			// consume
-			interactionController.Interaction = Action.None;
-			interactionFlag.ValueRW = false;
+			public void Execute(Entity entity, ref InteractionController interactionController, EnabledRefRW<InteractionFlag> interactionFlag)
+			{
+				ActionQueue.Enqueue(new ActionEvent
+				{
+					Source = entity,
+					Target = interactionController.Target,
+					Action = interactionController.Interaction,
+				});
+
+				// consume
+				interactionController.Interaction = Action.None;
+				interactionFlag.ValueRW = false;
+			}
 		}
-    }
+	}
 }

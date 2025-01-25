@@ -180,7 +180,7 @@ MonoBehaviour:
     HasMaxDownwardSlopeChangeAngle: 0
     MaxDownwardSlopeChangeAngle: 90
     ConstrainVelocityToGroundPlane: 1
-  MinViewAngle: -90
+  MinViewAngle: -80
   MaxViewAngle: 90
   InteractionRange: 1.5
 --- !u!114 &-4202127508360882810
@@ -207,6 +207,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 161d3927bbbdef94b91de836755debb5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  CanCarry: 1
 --- !u!114 &-8194759439482487760
 MonoBehaviour:
   m_ObjectHideFlags: 0
