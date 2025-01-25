@@ -16,8 +16,8 @@ namespace Dustbreaker
 		{
 			state.Dependency.Complete();
 
-			// we assume there is only one interaction controller
-			InteractionController interactionController = SystemAPI.GetSingleton<InteractionController>();
+			Entity playerEntity = SystemAPI.GetSingletonEntity<PlayerTag>();
+			InteractionController interactionController = SystemAPI.GetComponent<InteractionController>(playerEntity);
 
 			Action primaryInteraction = Action.None;
 			Action secondaryInteraction = Action.None;

@@ -181,7 +181,6 @@ namespace Dustbreaker
 					if (interactionController.Interaction != Action.None)
 					{
 						interactionFlagRW.ValueRW = true;
-						Debug.Log(interactionController.Interaction.ToString());
 					}
 				}
 				else

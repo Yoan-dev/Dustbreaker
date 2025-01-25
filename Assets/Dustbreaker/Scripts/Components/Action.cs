@@ -40,4 +40,12 @@ namespace Dustbreaker
 			return HasAction(Action.Pick) ? Action.Pick : Action.None;
 		}
 	}
+
+	[InternalBufferCapacity(0)]
+	public struct ActionEvent : IBufferElementData
+	{
+		public Entity Source;
+		public Entity Target;
+		public Action Action;
+	}
 }
