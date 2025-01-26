@@ -4,6 +4,7 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
+using Unity.Physics.GraphicsIntegration;
 using Unity.Transforms;
 
 namespace Dustbreaker
@@ -53,6 +54,7 @@ namespace Dustbreaker
 					// stop physics
 					state.EntityManager.SetComponentData(actionEvent.Target, new PhysicsVelocity());
 					state.EntityManager.RemoveComponent<PhysicsCollider>(actionEvent.Target);
+					state.EntityManager.RemoveComponent<PhysicsGraphicalSmoothing>(actionEvent.Target); // temp
 
 					// parenting
 					state.EntityManager.GetBuffer<Child>(actionEvent.Source).Add(new Child { Value = actionEvent.Target });
@@ -67,6 +69,7 @@ namespace Dustbreaker
 				else if (actionEvent.Action == Action.Drop)
 				{
 					// TODO: find safe drop position
+					// TODO: fix flicker on reactivate smoothing
 
 					state.EntityManager.SetComponentData(actionEvent.Source, new CarryComponent { Entity = Entity.Null });
 					state.EntityManager.SetComponentData(actionEvent.Target, new PickableComponent { Entity = Entity.Null });
@@ -76,6 +79,7 @@ namespace Dustbreaker
 					// restore physics
 					CachedPhysicsProperties properties = state.EntityManager.GetComponentData<CachedPhysicsProperties>(actionEvent.Target);
 					state.EntityManager.AddComponentData(actionEvent.Target, properties.PhysicsCollider);
+					state.EntityManager.AddComponentData(actionEvent.Target, new PhysicsGraphicalSmoothing { ApplySmoothing = 1 }); // temp
 
 					// set dynamic
 					PhysicsMass mass = state.EntityManager.GetComponentData<PhysicsMass>(actionEvent.Target);
