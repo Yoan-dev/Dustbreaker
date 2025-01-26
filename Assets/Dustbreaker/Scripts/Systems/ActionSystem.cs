@@ -88,7 +88,8 @@ namespace Dustbreaker
 					state.EntityManager.SetComponentData(actionEvent.Target, mass);
 
 					// transfer velocity
-					float3 characterVelocity = state.EntityManager.GetComponentData<KinematicCharacterBody>(actionEvent.Source).RelativeVelocity;
+					KinematicCharacterBody characterBody = state.EntityManager.GetComponentData<KinematicCharacterBody>(actionEvent.Source);
+					float3 characterVelocity = characterBody.RelativeVelocity + characterBody.ParentVelocity;
 					state.EntityManager.SetComponentData(actionEvent.Target, new PhysicsVelocity { Linear = characterVelocity });
 
 					// remove physics cache
