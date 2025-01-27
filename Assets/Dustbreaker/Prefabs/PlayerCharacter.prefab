@@ -28,7 +28,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.5, y: 0.875, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1555240849038293810}
@@ -163,7 +163,7 @@ MonoBehaviour:
     DetectObstructionsForParentBodyMovement: 0
     SimulateDynamicBody: 1
     Mass: 1
-  GroundMaxSpeed: 10
+  GroundMaxSpeed: 3.4
   GroundedMovementSharpness: 15
   AirDrag: 0
   JumpSpeed: 5
@@ -226,9 +226,9 @@ MonoBehaviour:
     y: 1
     z: 0
   m_PrimitiveSize:
-    x: 1
-    y: 1
-    z: 2
+    x: 0.5
+    y: 0.5
+    z: 1.75
   m_PrimitiveOrientation:
     Value:
       x: -90
@@ -236,15 +236,15 @@ MonoBehaviour:
       z: -90
     RotationOrder: 4
   m_Capsule:
-    Height: 2
-    Radius: 0.5
+    Height: 1.75
+    Radius: 0.25
     Axis: 2
   m_Cylinder:
-    Height: 2
-    Radius: 0.5
+    Height: 1.75
+    Radius: 0.25
     Axis: 2
   m_CylinderSideCount: 20
-  m_SphereRadius: 1
+  m_SphereRadius: 0.875
   m_MinimumSkinnedVertexWeight: 0.1
   m_ConvexHullGenerationParameters:
     m_SimplificationTolerance: 0.03
@@ -378,7 +378,7 @@ Transform:
   m_GameObject: {fileID: 3463604651959167738}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.4, z: 0}
+  m_LocalPosition: {x: 0, y: 1.65, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
