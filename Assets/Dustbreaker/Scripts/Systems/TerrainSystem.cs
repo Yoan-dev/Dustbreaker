@@ -260,7 +260,7 @@ namespace Dustbreaker
 					{
 						_colliderQueue.Schedule(coordinates, new GetColliderDataJob
 						{
-							MeshData = AcquireReadOnlyMeshData(_meshCache[coordinates])[0],
+							MeshDataArray = AcquireReadOnlyMeshData(_meshCache[coordinates]),
 							CollisionFilter = _collisionFilter,
 							Material = _material,
 							ColliderRef = new NativeReference<BlobAssetReference<Collider>>(Allocator.Persistent),
@@ -317,7 +317,7 @@ namespace Dustbreaker
 							noise.snoise(new float2(worldX * 0.05f, worldY * 0.05f)) +
 							noise.snoise(new float2(worldX * 0.1f, worldY * 0.1f)) / 2f;
 
-						Vertices[vi] = new float3(x - Size / 2f, height, y - Size / 2f);
+						Vertices[vi] = new float3(x - Size / 2f, height * 0.1f, y - Size / 2f);
 						Uvs[vi] = new float2(x / (float)Size, y / (float)Size);
 					}
 				}
@@ -344,21 +344,23 @@ namespace Dustbreaker
 		[BurstCompile]
 		public partial struct GetColliderDataJob : IJob, IDisposable
 		{
-			public MeshData MeshData;
+			[ReadOnly] public MeshDataArray MeshDataArray;
 			public CollisionFilter CollisionFilter;
 			public Material Material;
 			public NativeReference<BlobAssetReference<Collider>> ColliderRef;
 
 			public void Execute()
 			{
-				// mesh is forced to index format Uint16 and one SubMesh
-				NativeArray<ushort> indices = MeshData.GetIndexData<ushort>();
-				SubMeshDescriptor subMesh = MeshData.GetSubMesh(0);
+				MeshData meshData = MeshDataArray[0];
 
-				NativeArray<float3> vertices = new NativeArray<float3>(MeshData.vertexCount, Allocator.Temp);
+				// mesh is forced to index format Uint16 and one SubMesh
+				NativeArray<ushort> indices = meshData.GetIndexData<ushort>();
+				SubMeshDescriptor subMesh = meshData.GetSubMesh(0);
+
+				NativeArray<float3> vertices = new NativeArray<float3>(meshData.vertexCount, Allocator.Temp);
 				NativeArray<int3> triangles = new NativeArray<int3>(subMesh.indexCount / 3, Allocator.Temp);
 
-				MeshData.GetVertices(vertices.Reinterpret<Vector3>());
+				meshData.GetVertices(vertices.Reinterpret<Vector3>());
 
 				ushort ti = 0;
 				for (int i = 0; i < subMesh.indexCount; i += 3, ti++)
@@ -374,6 +376,7 @@ namespace Dustbreaker
 
 			public void Dispose()
 			{
+				MeshDataArray.Dispose();
 				ColliderRef.Dispose();
 			}
 		}
