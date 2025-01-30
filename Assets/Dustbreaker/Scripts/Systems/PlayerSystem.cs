@@ -16,6 +16,7 @@ namespace Dustbreaker
 	{
 		private static bool _focusActionsSetUp;
 		private bool _ignoreInput;
+		private bool _autoPilot;
 
 		protected override void OnCreate()
 		{
@@ -80,6 +81,11 @@ namespace Dustbreaker
 				}
 			}
 
+			if (Input.GetKeyDown(KeyCode.P))
+			{
+				_autoPilot = !_autoPilot;
+			}
+
 			// vehicle (temp)
 			foreach (var vehicleInputs in SystemAPI.Query<RefRW<VehicleInputs>>())
 			{
@@ -91,7 +97,7 @@ namespace Dustbreaker
 				}
 
 				vehicleInputs.ValueRW.Steering = (Input.GetKey(KeyCode.RightArrow) ? 1f : 0f) + (Input.GetKey(KeyCode.LeftArrow) ? -1f : 0f);
-				vehicleInputs.ValueRW.Throttle = (Input.GetKey(KeyCode.UpArrow) ? 1f : 0f) + (Input.GetKey(KeyCode.DownArrow) ? -1f : 0f);
+				vehicleInputs.ValueRW.Throttle = (Input.GetKey(KeyCode.UpArrow) ? 1f : _autoPilot ? 1f : 0f) + (Input.GetKey(KeyCode.DownArrow) ? -1f : 0f);
 			}
 		}
 	}

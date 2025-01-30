@@ -21,7 +21,7 @@ namespace Dustbreaker
 		[BurstCompile]
 		public void OnUpdate(ref SystemState state)
 		{
-			NativeArray<ActionEvent> actionEvents = SystemAPI.GetSingletonBuffer<ActionEvent>().AsNativeArray();
+			NativeArray<ActionEvent> actionEvents = SystemAPI.GetSingletonBuffer<ActionEvent>().ToNativeArray(Allocator.Temp);
 
 			for (int i = 0; i < actionEvents.Length; i++)
 			{
@@ -29,6 +29,7 @@ namespace Dustbreaker
 
 				if (actionEvent.Action == Action.Pick)
 				{
+					// TODO: prevent picking an item if already carrying one
 					// TODO: set carried item render in front
 
 					state.EntityManager.SetComponentData(actionEvent.Source, new CarryComponent { Entity = actionEvent.Target });
@@ -116,6 +117,7 @@ namespace Dustbreaker
 				}
 			}
 
+			actionEvents.Dispose();
 			SystemAPI.GetSingletonBuffer<ActionEvent>().Clear();
 		}
 	}

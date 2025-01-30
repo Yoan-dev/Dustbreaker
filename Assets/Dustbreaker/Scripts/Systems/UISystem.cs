@@ -9,7 +9,7 @@ namespace Dustbreaker
 		[BurstCompile]
 		public void OnCreate(ref SystemState state)
 		{
-			state.RequireForUpdate<InteractionController>();
+			state.RequireForUpdate<PlayerTag>();
 		}
 
 		public void OnUpdate(ref SystemState state)
