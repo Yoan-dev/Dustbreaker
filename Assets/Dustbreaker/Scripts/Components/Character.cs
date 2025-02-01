@@ -41,10 +41,10 @@ namespace Dustbreaker
 		public Entity CharacterEntity;
 	}
 
-	public struct ClimbComponent : IComponentData
+	public struct AttachedComponent : IComponentData
 	{
 		public Entity Target;
 	}
 
-	public struct ClimbingFlag : IComponentData, IEnableableComponent { }
+	public struct AttachedFlag : IComponentData, IEnableableComponent { }
 }

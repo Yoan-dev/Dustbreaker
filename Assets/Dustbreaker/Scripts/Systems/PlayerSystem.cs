@@ -79,6 +79,11 @@ namespace Dustbreaker
 				{
 					playerInputs.ValueRW.DropPressed.Set(tick);
 				}
+
+				if (Input.GetKeyDown(KeyCode.LeftAlt))
+				{
+					playerInputs.ValueRW.StopPressed.Set(tick);
+				}
 			}
 
 			if (Input.GetKeyDown(KeyCode.P))
@@ -176,60 +181,69 @@ namespace Dustbreaker
 				SystemAPI.Query<PlayerInputs, CharacterComponent, CarryComponent, RefRW<InteractionController>, EnabledRefRW<InteractionFlag>>().WithPresent<InteractionFlag, CarryComponent>().WithAll<Simulate>())
 			{
 				ref InteractionController interactionController = ref interactionControllerRW.ValueRW;
-				LocalToWorld viewLocalToWorld = SystemAPI.GetComponent<LocalToWorld>(character.ViewEntity);
-				float3 start = viewLocalToWorld.Position;
-				float3 end = start + viewLocalToWorld.Forward * character.InteractionRange;
-
-				RaycastInput raycastInput = new RaycastInput
+				
+				if (playerInputs.StopPressed.IsSet(tick))
 				{
-					Start = start,
-					End = end,
-					Filter = _interactionFilter,
-				};
-
-				if (playerInputs.DropPressed.IsSet(tick) && carry.Entity != Entity.Null)
+					interactionController.Interaction = Action.Stop;
+					interactionFlagRW.ValueRW = true;
+				}
+				else if (playerInputs.DropPressed.IsSet(tick) && carry.Entity != Entity.Null)
 				{
 					interactionController.Target = carry.Entity;
 					interactionController.Interaction = Action.Drop;
 					interactionFlagRW.ValueRW = true;
 				}
-				else if (collisionWorld.CastRay(raycastInput, out Unity.Physics.RaycastHit closestHit) && closestHit.Entity != carry.Entity)
-				{
-					// retrieve child interactable if compound collider
-					if (SystemAPI.HasBuffer<PhysicsColliderKeyEntityPair>(closestHit.Entity))
-					{
-						DynamicBuffer<PhysicsColliderKeyEntityPair> physicsColliders = SystemAPI.GetBuffer<PhysicsColliderKeyEntityPair>(closestHit.Entity);
-						for (int i = 0; i < physicsColliders.Length; i++)
-						{
-							if (physicsColliders[i].Key == closestHit.ColliderKey)
-							{
-								closestHit.Entity = physicsColliders[i].Entity;
-								break;
-							}
-						}
-					}
-
-					interactionController.Target = closestHit.Entity;
-
-					// we assume the target has an interactable component
-					InteractableComponent interactable = SystemAPI.GetComponent<InteractableComponent>(interactionController.Target);
-
-					if (playerInputs.PrimaryInteractionPressed.IsSet(tick))
-					{
-						interactionController.Interaction = interactable.GetPrimaryInteraction();
-						interactionFlagRW.ValueRW = true;
-					}
-					else if (playerInputs.SecondaryInteractionPressed.IsSet(tick))
-					{
-						interactionController.Interaction = interactable.GetSecondaryInteraction();
-						interactionFlagRW.ValueRW = true;
-					}
-				}
 				else
 				{
-					interactionController.Target = Entity.Null;
-					interactionController.Interaction = Action.None;
-					interactionFlagRW.ValueRW = false;
+					LocalToWorld viewLocalToWorld = SystemAPI.GetComponent<LocalToWorld>(character.ViewEntity);
+					float3 start = viewLocalToWorld.Position;
+					float3 end = start + viewLocalToWorld.Forward * character.InteractionRange;
+
+					RaycastInput raycastInput = new RaycastInput
+					{
+						Start = start,
+						End = end,
+						Filter = _interactionFilter,
+					};
+
+					if (collisionWorld.CastRay(raycastInput, out Unity.Physics.RaycastHit closestHit) && closestHit.Entity != carry.Entity)
+					{
+						// retrieve child interactable if compound collider
+						if (SystemAPI.HasBuffer<PhysicsColliderKeyEntityPair>(closestHit.Entity))
+						{
+							DynamicBuffer<PhysicsColliderKeyEntityPair> physicsColliders = SystemAPI.GetBuffer<PhysicsColliderKeyEntityPair>(closestHit.Entity);
+							for (int i = 0; i < physicsColliders.Length; i++)
+							{
+								if (physicsColliders[i].Key == closestHit.ColliderKey)
+								{
+									closestHit.Entity = physicsColliders[i].Entity;
+									break;
+								}
+							}
+						}
+
+						interactionController.Target = closestHit.Entity;
+
+						// we assume the target has an interactable component
+						InteractableComponent interactable = SystemAPI.GetComponent<InteractableComponent>(interactionController.Target);
+
+						if (playerInputs.PrimaryInteractionPressed.IsSet(tick))
+						{
+							interactionController.Interaction = interactable.GetPrimaryInteraction();
+							interactionFlagRW.ValueRW = true;
+						}
+						else if (playerInputs.SecondaryInteractionPressed.IsSet(tick))
+						{
+							interactionController.Interaction = interactable.GetSecondaryInteraction();
+							interactionFlagRW.ValueRW = true;
+						}
+					}
+					else
+					{
+						interactionController.Target = Entity.Null;
+						interactionController.Interaction = Action.None;
+						interactionFlagRW.ValueRW = false;
+					}
 				}
 			}
 		}

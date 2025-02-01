@@ -8,6 +8,7 @@ namespace Dustbreaker
 	{
 		public InteractableComponent Interactable;
 		public bool Ladder;
+		public bool Pilot;
 
 		public class Baker : Baker<InteractableAuthoring>
 		{
@@ -24,7 +25,13 @@ namespace Dustbreaker
 
 				if (authoring.Ladder)
 				{
-					AddComponent<ClimbableComponent>(entity);
+					AddComponent<ClimbableTag>(entity);
+					AddComponent<TrackedParentComponent>(entity);
+				}
+				else if (authoring.Pilot)
+				{
+					//AddComponent<PilotComponent>(entity);
+					//AddComponent<TrackedParentComponent>(entity);
 				}
 			}
 		}

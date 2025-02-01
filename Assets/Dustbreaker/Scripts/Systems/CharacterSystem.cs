@@ -41,9 +41,10 @@ namespace Dustbreaker
 
 			state.Dependency = new CharacterPhysicsUpdateJob { Context = _context, BaseContext = _baseContext }.ScheduleParallel(state.Dependency);
 
-			state.Dependency = new CharacterClimbPhysicsUpdateJob
+			state.Dependency = new CharacterAttachedPhysicsUpdateJob
 			{
-				ClimbableLookup = SystemAPI.GetComponentLookup<ClimbableComponent>(true),
+				ParentLookup = SystemAPI.GetComponentLookup<Parent>(true),
+				TrackedParentLookup = SystemAPI.GetComponentLookup<TrackedParentComponent>(true),
 				Context = _context,
 				BaseContext = _baseContext,
 			}.ScheduleParallel(state.Dependency);
@@ -51,7 +52,7 @@ namespace Dustbreaker
 
 		[BurstCompile]
 		[WithAll(typeof(Simulate))]
-		[WithDisabled(typeof(ClimbingFlag))]
+		[WithDisabled(typeof(AttachedFlag))]
 		public partial struct CharacterPhysicsUpdateJob : IJobEntity, IJobEntityChunkBeginEnd
 		{
 			public CharacterUpdateContext Context;
@@ -74,16 +75,17 @@ namespace Dustbreaker
 		}
 
 		[BurstCompile]
-		[WithAll(typeof(Simulate), typeof(ClimbingFlag))]
-		public partial struct CharacterClimbPhysicsUpdateJob : IJobEntity, IJobEntityChunkBeginEnd
+		[WithAll(typeof(Simulate), typeof(AttachedFlag))]
+		public partial struct CharacterAttachedPhysicsUpdateJob : IJobEntity, IJobEntityChunkBeginEnd
 		{
-			[ReadOnly] public ComponentLookup<ClimbableComponent> ClimbableLookup;
+			[ReadOnly] public ComponentLookup<Parent> ParentLookup;
+			[ReadOnly] public ComponentLookup<TrackedParentComponent> TrackedParentLookup;
 			public CharacterUpdateContext Context;
 			public KinematicCharacterUpdateContext BaseContext;
 
-			void Execute(CharacterAspect characterAspect, in ClimbComponent climb)
+			void Execute(CharacterAspect characterAspect, in AttachedComponent attached)
 			{
-				characterAspect.ClimbingPhysicsUpdate(ref Context, ref BaseContext, ClimbableLookup[climb.Target].Transform);
+				characterAspect.AttachedPhysicsUpdate(ref Context, ref BaseContext, ParentLookup[attached.Target].Value, TrackedParentLookup[attached.Target].Transform);
 			}
 
 			public bool OnChunkBegin(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)

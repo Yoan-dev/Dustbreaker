@@ -52,7 +52,7 @@ namespace Dustbreaker
 			KinematicCharacterAspect.Update_ProcessStatefulCharacterHits();
 		}
 
-		public void ClimbingPhysicsUpdate(ref CharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, RigidTransform climbableTransform)
+		public void AttachedPhysicsUpdate(ref CharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, Entity parentEntity, RigidTransform attachTransform)
 		{
 			ref CharacterComponent characterComponent = ref CharacterComponent.ValueRW;
 			ref KinematicCharacterBody characterBody = ref KinematicCharacterAspect.CharacterBody.ValueRW;
@@ -62,10 +62,11 @@ namespace Dustbreaker
 			KinematicCharacterAspect.Update_Initialize(in this, ref context, ref baseContext, ref characterBody, baseContext.Time.DeltaTime);
 			KinematicCharacterAspect.Update_ParentMovement(in this, ref context, ref baseContext, ref characterBody, ref characterPosition, characterBody.WasGroundedBeforeCharacterUpdate);
 
-			// Climbing phase
-			// TODO: climbing movement
+			// Attach phase
+			// TODO: climb up/down
 			// TODO: rotation
-			characterPosition = climbableTransform.pos;
+			characterPosition = attachTransform.pos;//
+			KinematicCharacterAspect.SetOrUpdateParentBody(ref baseContext, ref characterBody, parentEntity, attachTransform.pos);
 
 			// Second phase of default character update
 			KinematicCharacterAspect.Update_ParentMomentum(ref baseContext, ref characterBody);

@@ -29,10 +29,14 @@ namespace Dustbreaker
 
 				if (actionEvent.Action == Action.Use)
 				{
-					if (SystemAPI.HasComponent<ClimbableComponent>(actionEvent.Target))
+					if (SystemAPI.HasComponent<ClimbableTag>(actionEvent.Target))
 					{
-						Climb(actionEvent.Source, actionEvent.Target, ref state);
+						Attach(actionEvent.Source, actionEvent.Target, ref state);
 					}
+				}
+				else if (actionEvent.Action == Action.Stop)
+				{
+					Stop(actionEvent.Source, ref state);
 				}
 				else if (actionEvent.Action == Action.Pick)
 				{
@@ -138,31 +142,31 @@ namespace Dustbreaker
 			state.EntityManager.SetComponentData(target, transform);
 		}
 
-		public void Climb(Entity source, Entity target, ref SystemState state)
+		public void Attach(Entity source, Entity target, ref SystemState state)
 		{
 			ref KinematicCharacterProperties characterProperties = ref SystemAPI.GetComponentRW<KinematicCharacterProperties>(source).ValueRW;
 			ref KinematicCharacterBody characterBody = ref SystemAPI.GetComponentRW<KinematicCharacterBody>(source).ValueRW;
-			ref CharacterControl characterControl = ref SystemAPI.GetComponentRW<CharacterControl>(source).ValueRW;
-
-			// TEMP unclimb
-			if (state.EntityManager.IsComponentEnabled<ClimbingFlag>(source))
-			{
-				characterProperties.EvaluateGrounding = true;
-				characterProperties.DetectMovementCollisions = true;
-				characterProperties.DecollideFromOverlaps = true;
-				characterBody.IsGrounded = true;
-				state.EntityManager.SetComponentEnabled<ClimbingFlag>(source, false);
-				return;
-			}
-			//
-
 			characterProperties.EvaluateGrounding = false;
 			characterProperties.DetectMovementCollisions = false;
 			characterProperties.DecollideFromOverlaps = false;
 			characterBody.IsGrounded = false;
 
-			state.EntityManager.SetComponentData(source, new ClimbComponent { Target = target });
-			state.EntityManager.SetComponentEnabled<ClimbingFlag>(source, true);
+			state.EntityManager.SetComponentData(source, new AttachedComponent { Target = target });
+			state.EntityManager.SetComponentEnabled<AttachedFlag>(source, true);
+		}
+
+		public void Stop(Entity source, ref SystemState state)
+		{
+			// detach from ladder/pilot/else
+			if (state.EntityManager.IsComponentEnabled<AttachedFlag>(source))
+			{
+				ref KinematicCharacterProperties characterProperties = ref SystemAPI.GetComponentRW<KinematicCharacterProperties>(source).ValueRW;
+				characterProperties.EvaluateGrounding = true;
+				characterProperties.DetectMovementCollisions = true;
+				characterProperties.DecollideFromOverlaps = true;
+
+				state.EntityManager.SetComponentEnabled<AttachedFlag>(source, false);
+			}
 		}
 	}
 }

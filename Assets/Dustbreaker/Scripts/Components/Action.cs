@@ -11,6 +11,7 @@ namespace Dustbreaker
 		Use = 1 << 0,
 		Pick = 1 << 1,
 		Drop = 1 << 2,
+		Stop = 1 << 3,
 	}
 
 	public struct InteractionController : IComponentData
@@ -50,7 +51,9 @@ namespace Dustbreaker
 		public Action Action;
 	}
 
-	public struct ClimbableComponent : IComponentData
+	public struct ClimbableTag : IComponentData { }
+
+	public struct TrackedParentComponent : IComponentData
 	{
 		public RigidTransform Transform;
 	}

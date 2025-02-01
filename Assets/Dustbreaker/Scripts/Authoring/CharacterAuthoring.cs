@@ -50,9 +50,9 @@ namespace Dustbreaker
 				});
 				AddComponent<CharacterControl>(entity);
 
-				AddComponent<ClimbComponent>(entity);
-				AddComponent<ClimbingFlag>(entity);
-				SetComponentEnabled< ClimbingFlag>(entity, false);
+				AddComponent<AttachedComponent>(entity);
+				AddComponent<AttachedFlag>(entity);
+				SetComponentEnabled< AttachedFlag>(entity, false);
 			}
 		}
 	}
