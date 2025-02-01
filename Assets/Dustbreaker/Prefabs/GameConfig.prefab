@@ -45,5 +45,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   StreamingConfig:
-    StreamingRange: 512
+    StreamingRange: 384
     QuadrantSize: 128

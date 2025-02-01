@@ -11,9 +11,9 @@ namespace Dustbreaker
 		public float Throttle;
 	}
 
-	struct VehicleTag : IComponentData { }
+	public struct VehicleTag : IComponentData { }
 
-	struct VehicleSpeed : IComponentData
+	public struct VehicleSpeed : IComponentData
 	{
 		public float TopSpeed;
 		public float DesiredSpeed;
@@ -21,7 +21,7 @@ namespace Dustbreaker
 		public byte DriveEngaged;
 	}
 
-	struct VehicleSteering : IComponentData
+	public struct VehicleSteering : IComponentData
 	{
 		public float MaxSteeringAngle;
 		public float DesiredSteeringAngle;
@@ -29,7 +29,7 @@ namespace Dustbreaker
 	}
 
 	// configuration properties of the vehicle mechanics, which change with low frequency at run-time
-	struct VehicleConfiguration : IComponentData
+	public struct VehicleConfiguration : IComponentData
 	{
 		public float wheelBase;
 		public float wheelFrictionRight;
@@ -44,13 +44,13 @@ namespace Dustbreaker
 	}
 
 	// physics properties of the vehicle rigid body, which change with high frequency at run-time
-	struct VehicleBody : IComponentData
+	public struct VehicleBody : IComponentData
 	{
 		public float SlopeSlipFactor;
 		public float3 WorldCenterOfMass;
 	}
 
-	struct Wheel : IComponentData
+	public struct Wheel : IComponentData
 	{
 		public Entity Vehicle;
 		public Entity GraphicalRepresentation;

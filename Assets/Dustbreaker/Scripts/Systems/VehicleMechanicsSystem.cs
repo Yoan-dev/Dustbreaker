@@ -23,20 +23,6 @@ namespace Dustbreaker
 		}
 
 		[BurstCompile]
-		partial struct PrepareVehiclesJob : IJobEntity
-		{
-			private void Execute(Entity entity, ref VehicleBody vehicleBody, in VehicleConfiguration mechanics, in PhysicsMass mass, in LocalTransform localTransform)
-			{
-				vehicleBody.WorldCenterOfMass = mass.GetCenterOfMassWorldSpace(localTransform.Position, localTransform.Rotation);
-
-				// calculate a simple slip factor based on chassis tilt
-				float3 worldUp = math.mul(localTransform.Rotation, math.up());
-
-				vehicleBody.SlopeSlipFactor = math.pow(math.abs(math.dot(worldUp, math.up())), 4f);
-			}
-		}
-
-		[BurstCompile]
 		public void OnUpdate(ref SystemState state)
 		{
 			// update vehicle properties first
@@ -150,7 +136,6 @@ namespace Dustbreaker
 						weRight = math.rotate(wRotation, weRight);
 						weForward = math.rotate(wRotation, weForward);
 
-
 						newLocalTransform.ValueRW.Rotation = quaternion.AxisAngle(math.up(), desiredSteeringAngle);
 					}
 				}
@@ -179,8 +164,8 @@ namespace Dustbreaker
 				{
 					float3 wheelDesiredPos = (-ceUp * mechanics.suspensionLength) + rayStart;
 					var worldPosition = math.lerp(worldFromLocal.pos, wheelDesiredPos, mechanics.suspensionDamping / mechanics.suspensionStrength);
+					
 					// update translation of wheels along suspension column
-
 					newLocalTransform.ValueRW.Position = math.mul(parentFromWorld, new float4(worldPosition, 1f)).xyz;
 				}
 				else
@@ -191,7 +176,6 @@ namespace Dustbreaker
 					float3 wheelDesiredPos = math.lerp(rayStart, rayEnd, fraction);
 					// update translation of wheels along suspension column
 					var worldPosition = math.lerp(worldFromLocal.pos, wheelDesiredPos, mechanics.suspensionDamping / mechanics.suspensionStrength);
-
 
 					newLocalTransform.ValueRW.Position = math.mul(parentFromWorld, new float4(worldPosition, 1f)).xyz;
 
@@ -275,6 +259,20 @@ namespace Dustbreaker
 
 			commandBuffer.Playback(state.EntityManager);
 			commandBuffer.Dispose();
+		}
+
+		[BurstCompile]
+		partial struct PrepareVehiclesJob : IJobEntity
+		{
+			private void Execute(Entity entity, ref VehicleBody vehicleBody, in VehicleConfiguration mechanics, in PhysicsMass mass, in LocalTransform localTransform)
+			{
+				vehicleBody.WorldCenterOfMass = mass.GetCenterOfMassWorldSpace(localTransform.Position, localTransform.Rotation);
+
+				// calculate a simple slip factor based on chassis tilt
+				float3 worldUp = math.mul(localTransform.Rotation, math.up());
+
+				vehicleBody.SlopeSlipFactor = math.pow(math.abs(math.dot(worldUp, math.up())), 4f);
+			}
 		}
 	}
 }
