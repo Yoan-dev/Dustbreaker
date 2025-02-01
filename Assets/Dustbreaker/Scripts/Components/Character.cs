@@ -40,4 +40,11 @@ namespace Dustbreaker
 	{
 		public Entity CharacterEntity;
 	}
+
+	public struct ClimbComponent : IComponentData
+	{
+		public Entity Target;
+	}
+
+	public struct ClimbingFlag : IComponentData, IEnableableComponent { }
 }

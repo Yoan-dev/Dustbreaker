@@ -27,98 +27,142 @@ namespace Dustbreaker
 			{
 				ActionEvent actionEvent = actionEvents[i];
 
-				if (actionEvent.Action == Action.Pick)
+				if (actionEvent.Action == Action.Use)
 				{
-					// TODO: prevent picking an item if already carrying one
-					// TODO: set carried item render in front
-
-					state.EntityManager.SetComponentData(actionEvent.Source, new CarryComponent { Entity = actionEvent.Target });
-					state.EntityManager.SetComponentData(actionEvent.Target, new PickableComponent { Entity = actionEvent.Source });
-					state.EntityManager.SetComponentEnabled<CarryComponent>(actionEvent.Source, true);
-					state.EntityManager.SetComponentEnabled<PickableComponent>(actionEvent.Target, true);
-
-					PhysicsMass mass = state.EntityManager.GetComponentData<PhysicsMass>(actionEvent.Target);
-
-					// create physics cache
-					state.EntityManager.AddComponentData(actionEvent.Target, new CachedPhysicsProperties
+					if (SystemAPI.HasComponent<ClimbableComponent>(actionEvent.Target))
 					{
-						PhysicsCollider = state.EntityManager.GetComponentData<PhysicsCollider>(actionEvent.Target),
-						InverseInertia = mass.InverseInertia,
-						InverseMass = mass.InverseMass,
-					});
-
-					// set kinematic
-					mass.InverseMass = 0f;
-					mass.InverseInertia = float3.zero;
-					state.EntityManager.SetComponentData(actionEvent.Target, mass);
-
-					// stop physics
-					state.EntityManager.SetComponentData(actionEvent.Target, new PhysicsVelocity());
-					state.EntityManager.RemoveComponent<PhysicsCollider>(actionEvent.Target);
-					state.EntityManager.RemoveComponent<PhysicsGraphicalSmoothing>(actionEvent.Target); // temp
-
-					// parenting
-					state.EntityManager.GetBuffer<Child>(actionEvent.Source).Add(new Child { Value = actionEvent.Target });
-					state.EntityManager.AddComponentData(actionEvent.Target, new Parent { Value = actionEvent.Source });
-
-					// transform
-					LocalTransform transform = state.EntityManager.GetComponentData<LocalTransform>(actionEvent.Target);
-					transform.Position = new float3(0f, 1f, 0.75f);
-					transform.Rotation = quaternion.identity;
-					state.EntityManager.SetComponentData(actionEvent.Target, transform);
+						Climb(actionEvent.Source, actionEvent.Target, ref state);
+					}
+				}
+				else if (actionEvent.Action == Action.Pick)
+				{
+					Pick(actionEvent.Source, actionEvent.Target, ref state);
 				}
 				else if (actionEvent.Action == Action.Drop)
 				{
-					// TODO: find safe drop position
-					// TODO: fix flicker on reactivate smoothing
-
-					state.EntityManager.SetComponentData(actionEvent.Source, new CarryComponent { Entity = Entity.Null });
-					state.EntityManager.SetComponentData(actionEvent.Target, new PickableComponent { Entity = Entity.Null });
-					state.EntityManager.SetComponentEnabled<CarryComponent>(actionEvent.Source, false);
-					state.EntityManager.SetComponentEnabled<PickableComponent>(actionEvent.Target, false);
-
-					// restore physics
-					CachedPhysicsProperties properties = state.EntityManager.GetComponentData<CachedPhysicsProperties>(actionEvent.Target);
-					state.EntityManager.AddComponentData(actionEvent.Target, properties.PhysicsCollider);
-					state.EntityManager.AddComponentData(actionEvent.Target, new PhysicsGraphicalSmoothing { ApplySmoothing = 1 }); // temp
-
-					// set dynamic
-					PhysicsMass mass = state.EntityManager.GetComponentData<PhysicsMass>(actionEvent.Target);
-					mass.InverseMass = properties.InverseMass;
-					mass.InverseInertia = properties.InverseInertia;
-					state.EntityManager.SetComponentData(actionEvent.Target, mass);
-
-					// transfer velocity
-					KinematicCharacterBody characterBody = state.EntityManager.GetComponentData<KinematicCharacterBody>(actionEvent.Source);
-					float3 characterVelocity = characterBody.RelativeVelocity + characterBody.ParentVelocity;
-					state.EntityManager.SetComponentData(actionEvent.Target, new PhysicsVelocity { Linear = characterVelocity });
-
-					// remove physics cache
-					state.EntityManager.RemoveComponent<CachedPhysicsProperties>(actionEvent.Target);
-
-					// parenting
-					DynamicBuffer<Child> children = SystemAPI.GetBuffer<Child>(actionEvent.Source);
-					for (int j = 0; j < children.Length; j++)
-					{
-						if (children[j].Value == actionEvent.Target)
-						{
-							children.RemoveAt(j);
-							break;
-						}
-					}
-					state.EntityManager.RemoveComponent<Parent>(actionEvent.Target);
-					float scale = state.EntityManager.GetComponentData<LocalTransform>(actionEvent.Target).Scale;
-
-					// transform
-					LocalTransform transform = SystemAPI.GetComponent<LocalTransform>(actionEvent.Source);
-					transform.Position += transform.Forward() * 0.75f + new float3(0f, 1f, 0f);
-					transform.Scale = scale;
-					state.EntityManager.SetComponentData(actionEvent.Target, transform);
+					Drop(actionEvent.Source, actionEvent.Target, ref state);
 				}
 			}
 
 			actionEvents.Dispose();
 			SystemAPI.GetSingletonBuffer<ActionEvent>().Clear();
+		}
+
+		public void Pick(Entity source, Entity target, ref SystemState state)
+		{
+			// TODO: prevent picking an item if already carrying one
+			// TODO: set carried item render in front
+
+			state.EntityManager.SetComponentData(source, new CarryComponent { Entity = target });
+			state.EntityManager.SetComponentData(target, new PickableComponent { Entity = source });
+			state.EntityManager.SetComponentEnabled<CarryComponent>(source, true);
+			state.EntityManager.SetComponentEnabled<PickableComponent>(target, true);
+
+			PhysicsMass mass = state.EntityManager.GetComponentData<PhysicsMass>(target);
+
+			// create physics cache
+			state.EntityManager.AddComponentData(target, new CachedPhysicsProperties
+			{
+				PhysicsCollider = state.EntityManager.GetComponentData<PhysicsCollider>(target),
+				InverseInertia = mass.InverseInertia,
+				InverseMass = mass.InverseMass,
+			});
+
+			// set kinematic
+			mass.InverseMass = 0f;
+			mass.InverseInertia = float3.zero;
+			state.EntityManager.SetComponentData(target, mass);
+
+			// stop physics
+			state.EntityManager.SetComponentData(target, new PhysicsVelocity());
+			state.EntityManager.RemoveComponent<PhysicsCollider>(target);
+			state.EntityManager.RemoveComponent<PhysicsGraphicalSmoothing>(target); // temp
+
+			// parenting
+			state.EntityManager.GetBuffer<Child>(source).Add(new Child { Value = target });
+			state.EntityManager.AddComponentData(target, new Parent { Value = source });
+
+			// transform
+			LocalTransform transform = state.EntityManager.GetComponentData<LocalTransform>(target);
+			transform.Position = new float3(0f, 1f, 0.75f);
+			transform.Rotation = quaternion.identity;
+			state.EntityManager.SetComponentData(target, transform);
+		}
+
+		public void Drop(Entity source, Entity target, ref SystemState state)
+		{
+			// TODO: find safe drop position
+			// TODO: fix flicker on reactivate smoothing
+
+			state.EntityManager.SetComponentData(source, new CarryComponent { Entity = Entity.Null });
+			state.EntityManager.SetComponentData(target, new PickableComponent { Entity = Entity.Null });
+			state.EntityManager.SetComponentEnabled<CarryComponent>(source, false);
+			state.EntityManager.SetComponentEnabled<PickableComponent>(target, false);
+
+			// restore physics
+			CachedPhysicsProperties properties = state.EntityManager.GetComponentData<CachedPhysicsProperties>(target);
+			state.EntityManager.AddComponentData(target, properties.PhysicsCollider);
+			state.EntityManager.AddComponentData(target, new PhysicsGraphicalSmoothing { ApplySmoothing = 1 }); // temp
+
+			// set dynamic
+			PhysicsMass mass = state.EntityManager.GetComponentData<PhysicsMass>(target);
+			mass.InverseMass = properties.InverseMass;
+			mass.InverseInertia = properties.InverseInertia;
+			state.EntityManager.SetComponentData(target, mass);
+
+			// transfer velocity
+			KinematicCharacterBody characterBody = state.EntityManager.GetComponentData<KinematicCharacterBody>(source);
+			float3 characterVelocity = characterBody.RelativeVelocity + characterBody.ParentVelocity;
+			state.EntityManager.SetComponentData(target, new PhysicsVelocity { Linear = characterVelocity });
+
+			// remove physics cache
+			state.EntityManager.RemoveComponent<CachedPhysicsProperties>(target);
+
+			// parenting
+			DynamicBuffer<Child> children = SystemAPI.GetBuffer<Child>(source);
+			for (int j = 0; j < children.Length; j++)
+			{
+				if (children[j].Value == target)
+				{
+					children.RemoveAt(j);
+					break;
+				}
+			}
+			state.EntityManager.RemoveComponent<Parent>(target);
+			float scale = state.EntityManager.GetComponentData<LocalTransform>(target).Scale;
+
+			// transform
+			LocalTransform transform = SystemAPI.GetComponent<LocalTransform>(source);
+			transform.Position += transform.Forward() * 0.75f + new float3(0f, 1f, 0f);
+			transform.Scale = scale;
+			state.EntityManager.SetComponentData(target, transform);
+		}
+
+		public void Climb(Entity source, Entity target, ref SystemState state)
+		{
+			ref KinematicCharacterProperties characterProperties = ref SystemAPI.GetComponentRW<KinematicCharacterProperties>(source).ValueRW;
+			ref KinematicCharacterBody characterBody = ref SystemAPI.GetComponentRW<KinematicCharacterBody>(source).ValueRW;
+			ref CharacterControl characterControl = ref SystemAPI.GetComponentRW<CharacterControl>(source).ValueRW;
+
+			// TEMP unclimb
+			if (state.EntityManager.IsComponentEnabled<ClimbingFlag>(source))
+			{
+				characterProperties.EvaluateGrounding = true;
+				characterProperties.DetectMovementCollisions = true;
+				characterProperties.DecollideFromOverlaps = true;
+				characterBody.IsGrounded = true;
+				state.EntityManager.SetComponentEnabled<ClimbingFlag>(source, false);
+				return;
+			}
+			//
+
+			characterProperties.EvaluateGrounding = false;
+			characterProperties.DetectMovementCollisions = false;
+			characterProperties.DecollideFromOverlaps = false;
+			characterBody.IsGrounded = false;
+
+			state.EntityManager.SetComponentData(source, new ClimbComponent { Target = target });
+			state.EntityManager.SetComponentEnabled<ClimbingFlag>(source, true);
 		}
 	}
 }

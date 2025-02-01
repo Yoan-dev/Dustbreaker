@@ -195,6 +195,20 @@ namespace Dustbreaker
 				}
 				else if (collisionWorld.CastRay(raycastInput, out Unity.Physics.RaycastHit closestHit) && closestHit.Entity != carry.Entity)
 				{
+					// retrieve child interactable if compound collider
+					if (SystemAPI.HasBuffer<PhysicsColliderKeyEntityPair>(closestHit.Entity))
+					{
+						DynamicBuffer<PhysicsColliderKeyEntityPair> physicsColliders = SystemAPI.GetBuffer<PhysicsColliderKeyEntityPair>(closestHit.Entity);
+						for (int i = 0; i < physicsColliders.Length; i++)
+						{
+							if (physicsColliders[i].Key == closestHit.ColliderKey)
+							{
+								closestHit.Entity = physicsColliders[i].Entity;
+								break;
+							}
+						}
+					}
+
 					interactionController.Target = closestHit.Entity;
 
 					// we assume the target has an interactable component

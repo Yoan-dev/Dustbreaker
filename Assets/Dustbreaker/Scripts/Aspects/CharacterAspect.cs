@@ -52,6 +52,26 @@ namespace Dustbreaker
 			KinematicCharacterAspect.Update_ProcessStatefulCharacterHits();
 		}
 
+		public void ClimbingPhysicsUpdate(ref CharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext, RigidTransform climbableTransform)
+		{
+			ref CharacterComponent characterComponent = ref CharacterComponent.ValueRW;
+			ref KinematicCharacterBody characterBody = ref KinematicCharacterAspect.CharacterBody.ValueRW;
+			ref float3 characterPosition = ref KinematicCharacterAspect.LocalTransform.ValueRW.Position;
+
+			// First phase of default character update
+			KinematicCharacterAspect.Update_Initialize(in this, ref context, ref baseContext, ref characterBody, baseContext.Time.DeltaTime);
+			KinematicCharacterAspect.Update_ParentMovement(in this, ref context, ref baseContext, ref characterBody, ref characterPosition, characterBody.WasGroundedBeforeCharacterUpdate);
+
+			// Climbing phase
+			// TBD HandleVelocityControl when climbing
+			// TODO: rotation
+			characterPosition = climbableTransform.pos;
+
+			// Second phase of default character update
+			KinematicCharacterAspect.Update_ParentMomentum(ref baseContext, ref characterBody);
+			KinematicCharacterAspect.Update_ProcessStatefulCharacterHits();
+		}
+
 		private void HandleVelocityControl(ref CharacterUpdateContext context, ref KinematicCharacterUpdateContext baseContext)
 		{
 			float deltaTime = baseContext.Time.DeltaTime;

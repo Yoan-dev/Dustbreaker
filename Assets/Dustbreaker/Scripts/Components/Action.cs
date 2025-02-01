@@ -1,5 +1,6 @@
 using System;
 using Unity.Entities;
+using Unity.Mathematics;
 
 namespace Dustbreaker
 {
@@ -47,5 +48,10 @@ namespace Dustbreaker
 		public Entity Source;
 		public Entity Target;
 		public Action Action;
+	}
+
+	public struct ClimbableComponent : IComponentData
+	{
+		public RigidTransform Transform;
 	}
 }

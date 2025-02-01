@@ -48,7 +48,11 @@ namespace Dustbreaker
 
 					InteractionRange = authoring.InteractionRange,
 				});
-				AddComponent(entity, new CharacterControl());
+				AddComponent<CharacterControl>(entity);
+
+				AddComponent<ClimbComponent>(entity);
+				AddComponent<ClimbingFlag>(entity);
+				SetComponentEnabled< ClimbingFlag>(entity, false);
 			}
 		}
 	}

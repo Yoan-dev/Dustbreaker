@@ -7,6 +7,7 @@ namespace Dustbreaker
 	public class InteractableAuthoring : MonoBehaviour
 	{
 		public InteractableComponent Interactable;
+		public bool Ladder;
 
 		public class Baker : Baker<InteractableAuthoring>
 		{
@@ -19,6 +20,11 @@ namespace Dustbreaker
 				{
 					AddComponent<PickableComponent>(entity);
 					SetComponentEnabled<PickableComponent>(entity, false);
+				}
+
+				if (authoring.Ladder)
+				{
+					AddComponent<ClimbableComponent>(entity);
 				}
 			}
 		}

@@ -11,7 +11,6 @@ using Unity.Burst.Intrinsics;
 namespace Dustbreaker
 {
 	[UpdateInGroup(typeof(KinematicCharacterPhysicsUpdateGroup))]
-	[BurstCompile]
 	public partial struct CharacterPhysicsUpdateSystem : ISystem
 	{
 		private EntityQuery _characterQuery;
@@ -22,9 +21,7 @@ namespace Dustbreaker
 		public void OnCreate(ref SystemState state)
 		{
 			_characterQuery = KinematicCharacterUtilities.GetBaseCharacterQueryBuilder()
-				.WithAll<
-					CharacterComponent,
-					CharacterControl>()
+				.WithAll<CharacterComponent, CharacterControl>()
 				.Build(ref state);
 
 			_context = new CharacterUpdateContext();
@@ -42,16 +39,19 @@ namespace Dustbreaker
 			_context.OnSystemUpdate(ref state);
 			_baseContext.OnSystemUpdate(ref state, SystemAPI.Time, SystemAPI.GetSingleton<PhysicsWorldSingleton>());
 
-			CharacterPhysicsUpdateJob job = new CharacterPhysicsUpdateJob
+			state.Dependency = new CharacterPhysicsUpdateJob { Context = _context, BaseContext = _baseContext }.ScheduleParallel(state.Dependency);
+
+			state.Dependency = new CharacterClimbPhysicsUpdateJob
 			{
+				ClimbableLookup = SystemAPI.GetComponentLookup<ClimbableComponent>(true),
 				Context = _context,
 				BaseContext = _baseContext,
-			};
-			job.ScheduleParallel();
+			}.ScheduleParallel(state.Dependency);
 		}
 
 		[BurstCompile]
 		[WithAll(typeof(Simulate))]
+		[WithDisabled(typeof(ClimbingFlag))]
 		public partial struct CharacterPhysicsUpdateJob : IJobEntity, IJobEntityChunkBeginEnd
 		{
 			public CharacterUpdateContext Context;
@@ -72,13 +72,36 @@ namespace Dustbreaker
 			{
 			}
 		}
+
+		[BurstCompile]
+		[WithAll(typeof(Simulate), typeof(ClimbingFlag))]
+		public partial struct CharacterClimbPhysicsUpdateJob : IJobEntity, IJobEntityChunkBeginEnd
+		{
+			[ReadOnly] public ComponentLookup<ClimbableComponent> ClimbableLookup;
+			public CharacterUpdateContext Context;
+			public KinematicCharacterUpdateContext BaseContext;
+
+			void Execute(CharacterAspect characterAspect, in ClimbComponent climb)
+			{
+				characterAspect.ClimbingPhysicsUpdate(ref Context, ref BaseContext, ClimbableLookup[climb.Target].Transform);
+			}
+
+			public bool OnChunkBegin(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
+			{
+				BaseContext.EnsureCreationOfTmpCollections();
+				return true;
+			}
+
+			public void OnChunkEnd(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask, bool chunkWasExecuted)
+			{
+			}
+		}
 	}
 
 	[UpdateInGroup(typeof(SimulationSystemGroup))]
 	[UpdateAfter(typeof(FixedStepSimulationSystemGroup))]
 	[UpdateAfter(typeof(PlayerVariableStepControlSystem))]
 	[UpdateBefore(typeof(TransformSystemGroup))]
-	[BurstCompile]
 	public partial struct CharacterVariableUpdateSystem : ISystem
 	{
 		private EntityQuery _characterQuery;
