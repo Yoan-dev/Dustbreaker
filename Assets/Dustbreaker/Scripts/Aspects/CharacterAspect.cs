@@ -63,7 +63,7 @@ namespace Dustbreaker
 			KinematicCharacterAspect.Update_ParentMovement(in this, ref context, ref baseContext, ref characterBody, ref characterPosition, characterBody.WasGroundedBeforeCharacterUpdate);
 
 			// Climbing phase
-			// TBD HandleVelocityControl when climbing
+			// TODO: climbing movement
 			// TODO: rotation
 			characterPosition = climbableTransform.pos;
 
