@@ -29,7 +29,12 @@ namespace Dustbreaker
 
 				if (actionEvent.Action == Action.Use)
 				{
+					// TBD: usage flag instead of tag (or both)
 					if (SystemAPI.HasComponent<ClimbableTag>(actionEvent.Target))
+					{
+						Attach(actionEvent.Source, actionEvent.Target, ref state);
+					}
+					else if (SystemAPI.HasComponent<PilotTag>(actionEvent.Target))
 					{
 						Attach(actionEvent.Source, actionEvent.Target, ref state);
 					}
@@ -52,7 +57,7 @@ namespace Dustbreaker
 			SystemAPI.GetSingletonBuffer<ActionEvent>().Clear();
 		}
 
-		public void Pick(Entity source, Entity target, ref SystemState state)
+		private void Pick(Entity source, Entity target, ref SystemState state)
 		{
 			// TODO: prevent picking an item if already carrying one
 			// TODO: set carried item render in front
@@ -91,7 +96,7 @@ namespace Dustbreaker
 			state.EntityManager.SetComponentData(target, transform);
 		}
 
-		public void Drop(Entity source, Entity target, ref SystemState state)
+		private void Drop(Entity source, Entity target, ref SystemState state)
 		{
 			// TODO: find safe drop position
 			// TODO: fix flicker on reactivate smoothing
@@ -138,7 +143,7 @@ namespace Dustbreaker
 			state.EntityManager.SetComponentData(target, transform);
 		}
 
-		public void Attach(Entity source, Entity target, ref SystemState state)
+		private void Attach(Entity source, Entity target, ref SystemState state)
 		{
 			ref KinematicCharacterProperties characterProperties = ref SystemAPI.GetComponentRW<KinematicCharacterProperties>(source).ValueRW;
 			ref KinematicCharacterBody characterBody = ref SystemAPI.GetComponentRW<KinematicCharacterBody>(source).ValueRW;
@@ -149,9 +154,12 @@ namespace Dustbreaker
 
 			state.EntityManager.SetComponentData(source, new AttachedComponent { Target = target });
 			state.EntityManager.SetComponentEnabled<AttachedFlag>(source, true);
+
+			float3 displacement = state.EntityManager.GetComponentData<EnterExitComponent>(target).EnterDisplacement;
+			DisplaceAttachedEntity(source, target, displacement, ref state);
 		}
 
-		public void Stop(Entity source, ref SystemState state)
+		private void Stop(Entity source, ref SystemState state)
 		{
 			// detach from ladder/pilot/else
 			if (state.EntityManager.IsComponentEnabled<AttachedFlag>(source))
@@ -162,7 +170,19 @@ namespace Dustbreaker
 				characterProperties.DecollideFromOverlaps = true;
 
 				state.EntityManager.SetComponentEnabled<AttachedFlag>(source, false);
+
+				Entity target = state.EntityManager.GetComponentData<AttachedComponent>(source).Target;
+				float3 displacement = state.EntityManager.GetComponentData<EnterExitComponent>(target).ExitDisplacement;
+				DisplaceAttachedEntity(source, target, displacement, ref state);
 			}
+		}
+
+		private void DisplaceAttachedEntity(Entity attached, Entity attach, float3 displacement, ref SystemState state)
+		{
+			// TODO: IgnoreY param
+			RigidTransform attachTransform = state.EntityManager.GetComponentData<TrackedParentComponent>(attach).Transform;
+			ref LocalTransform characterTransform = ref SystemAPI.GetComponentRW<LocalTransform>(attached).ValueRW;
+			characterTransform.Position = attachTransform.pos + math.rotate(attachTransform.rot, displacement);
 		}
 	}
 }

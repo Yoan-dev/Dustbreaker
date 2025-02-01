@@ -61,11 +61,9 @@ namespace Dustbreaker
 			// First phase of default character update
 			KinematicCharacterAspect.Update_Initialize(in this, ref context, ref baseContext, ref characterBody, baseContext.Time.DeltaTime);
 			KinematicCharacterAspect.Update_ParentMovement(in this, ref context, ref baseContext, ref characterBody, ref characterPosition, characterBody.WasGroundedBeforeCharacterUpdate);
-
+			
 			// Attach phase
 			// TODO: climb up/down
-			// TODO: rotation
-			characterPosition = attachTransform.pos;//
 			KinematicCharacterAspect.SetOrUpdateParentBody(ref baseContext, ref characterBody, parentEntity, attachTransform.pos);
 
 			// Second phase of default character update

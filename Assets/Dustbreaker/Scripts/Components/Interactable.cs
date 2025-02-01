@@ -1,3 +1,4 @@
+using System;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
@@ -25,5 +26,13 @@ namespace Dustbreaker
 	public struct TrackedParentComponent : IComponentData
 	{
 		public RigidTransform Transform;
+	}
+
+	[Serializable]
+	public struct EnterExitComponent : IComponentData
+	{
+		public float3 EnterDisplacement;
+		public float3 ExitDisplacement;
+		public bool IgnoreY;
 	}
 }

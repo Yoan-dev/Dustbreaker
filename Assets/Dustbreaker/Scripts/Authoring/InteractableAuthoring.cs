@@ -7,6 +7,8 @@ namespace Dustbreaker
 	public class InteractableAuthoring : MonoBehaviour
 	{
 		public InteractableComponent Interactable;
+
+		[Header("Usage")]
 		public bool Ladder;
 		public bool Pilot;
 
@@ -29,8 +31,8 @@ namespace Dustbreaker
 				}
 				else if (authoring.Pilot)
 				{
-					//AddComponent<PilotComponent>(entity);
-					//AddComponent<TrackedParentComponent>(entity);
+					AddComponent<PilotTag>(entity);
+					AddComponent<TrackedParentComponent>(entity);
 				}
 			}
 		}
