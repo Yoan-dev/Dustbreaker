@@ -166,7 +166,7 @@ namespace Dustbreaker
 			state.EntityManager.SetComponentEnabled<AttachedFlag>(source, true);
 
 			float3 displacement = state.EntityManager.GetComponentData<EnterExitComponent>(target).EnterDisplacement;
-			DisplaceAttachedEntity(source, target, displacement, ref state);
+			DisplaceAttachedEntity(source, target, displacement, false, ref state);
 		}
 
 		private void Stop(Entity source, ref SystemState state)
@@ -183,7 +183,7 @@ namespace Dustbreaker
 
 				Entity target = state.EntityManager.GetComponentData<AttachedComponent>(source).Target;
 				float3 displacement = state.EntityManager.GetComponentData<EnterExitComponent>(target).ExitDisplacement;
-				DisplaceAttachedEntity(source, target, displacement, ref state);
+				DisplaceAttachedEntity(source, target, displacement, true, ref state);
 			}
 
 			// stop
@@ -193,12 +193,21 @@ namespace Dustbreaker
 			}
 		}
 
-		private void DisplaceAttachedEntity(Entity attached, Entity attach, float3 displacement, ref SystemState state)
+		private void DisplaceAttachedEntity(Entity attached, Entity attach, float3 displacement, bool resetRotation, ref SystemState state)
 		{
 			// TODO: IgnoreY param
 			RigidTransform attachTransform = state.EntityManager.GetComponentData<TrackedParentComponent>(attach).Transform;
 			ref LocalTransform characterTransform = ref SystemAPI.GetComponentRW<LocalTransform>(attached).ValueRW;
+			
 			characterTransform.Position = attachTransform.pos + math.rotate(attachTransform.rot, displacement);
+			
+			if (resetRotation)
+			{
+				float3 euler = math.Euler(characterTransform.Rotation);
+				euler.x = 0f;
+				euler.z = 0f;
+				characterTransform.Rotation = quaternion.Euler(euler);
+			}
 		}
 
 		private void Pilot(Entity source, Entity target, ref SystemState state)
