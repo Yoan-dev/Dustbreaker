@@ -50,11 +50,4 @@ namespace Dustbreaker
 		public Entity Target;
 		public Action Action;
 	}
-
-	public struct ClimbableTag : IComponentData { }
-
-	public struct TrackedParentComponent : IComponentData
-	{
-		public RigidTransform Transform;
-	}
 }

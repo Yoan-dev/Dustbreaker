@@ -58,9 +58,7 @@ namespace Dustbreaker
 			// TODO: set carried item render in front
 
 			state.EntityManager.SetComponentData(source, new CarryComponent { Entity = target });
-			state.EntityManager.SetComponentData(target, new PickableComponent { Entity = source });
 			state.EntityManager.SetComponentEnabled<CarryComponent>(source, true);
-			state.EntityManager.SetComponentEnabled<PickableComponent>(target, true);
 
 			PhysicsMass mass = state.EntityManager.GetComponentData<PhysicsMass>(target);
 
@@ -99,9 +97,7 @@ namespace Dustbreaker
 			// TODO: fix flicker on reactivate smoothing
 
 			state.EntityManager.SetComponentData(source, new CarryComponent { Entity = Entity.Null });
-			state.EntityManager.SetComponentData(target, new PickableComponent { Entity = Entity.Null });
 			state.EntityManager.SetComponentEnabled<CarryComponent>(source, false);
-			state.EntityManager.SetComponentEnabled<PickableComponent>(target, false);
 
 			// restore physics
 			CachedPhysicsProperties properties = state.EntityManager.GetComponentData<CachedPhysicsProperties>(target);

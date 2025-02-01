@@ -19,8 +19,7 @@ namespace Dustbreaker
 
 				if (authoring.Interactable.HasAction(Action.Pick))
 				{
-					AddComponent<PickableComponent>(entity);
-					SetComponentEnabled<PickableComponent>(entity, false);
+					AddComponent<PickableTag>(entity);
 				}
 
 				if (authoring.Ladder)
