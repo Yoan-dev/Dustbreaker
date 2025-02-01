@@ -1,6 +1,7 @@
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
+using UnityEngine;
 
 // based on EntityComponentSystemSamples-PhysicsSamples (see: LICENSE)
 
@@ -10,6 +11,8 @@ namespace Dustbreaker
 	[UpdateInGroup(typeof(InitializationSystemGroup))]
 	partial struct VehicleInputHandlingSystem : ISystem
 	{
+		private bool _autoPilot; // temp
+
 		[BurstCompile]
 		public void OnCreate(ref SystemState state)
 		{
@@ -24,10 +27,15 @@ namespace Dustbreaker
 
 			var input = SystemAPI.GetSingleton<VehicleInputs>();
 
+			if (Input.GetKeyDown(KeyCode.P))
+			{
+				_autoPilot = !_autoPilot;
+			}
+
 			foreach (var (speed, steering) in SystemAPI.Query<RefRW<VehicleSpeed>, RefRW<VehicleSteering>>())
 			{
 				float x = input.Steering;
-				float a = input.Throttle;
+				float a = _autoPilot ? 1f : input.Throttle;
 
 				var newSpeed = a * speed.ValueRW.TopSpeed;
 				speed.ValueRW.DriveEngaged = (byte)(newSpeed == 0f ? 0 : 1);

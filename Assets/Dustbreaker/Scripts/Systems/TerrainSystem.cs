@@ -313,9 +313,9 @@ namespace Dustbreaker
 						int worldX = x + offset.x;
 						int worldY = y + offset.y;
 						float height =
-							noise.snoise(new float2(worldX * 0.01f, worldY * 0.01f)) +
-							noise.snoise(new float2(worldX * 0.1f, worldY * 0.1f)) * 0.5f +
-							math.smoothstep(0.7f, 1f, noise.snoise(new float2(worldX * 0.02f, worldY * 0.02f))) * 15f;
+							noise.snoise(new float2(worldX * 0.005f, worldY * 0.005f)) * 2f +
+							noise.snoise(new float2(worldX * 0.02f, worldY * 0.02f)) * 0.5f +
+							math.smoothstep(0.85f, 1f, noise.snoise(new float2(worldX * 0.02f, worldY * 0.02f))) * 15f;
 
 						Vertices[vi] = new float3(x - Size / 2f, height, y - Size / 2f);
 						Uvs[vi] = new float2(x / (float)Size, y / (float)Size);
