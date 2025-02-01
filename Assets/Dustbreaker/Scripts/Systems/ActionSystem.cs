@@ -6,6 +6,7 @@ using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.GraphicsIntegration;
 using Unity.Transforms;
+using static UnityEngine.InputSystem.PlayerInput;
 
 namespace Dustbreaker
 {
@@ -30,13 +31,15 @@ namespace Dustbreaker
 				if (actionEvent.Action == Action.Use)
 				{
 					// TBD: usage flag instead of tag (or both)
-					if (SystemAPI.HasComponent<ClimbableTag>(actionEvent.Target))
+					if (state.EntityManager.HasComponent<ClimbableTag>(actionEvent.Target))
 					{
 						Attach(actionEvent.Source, actionEvent.Target, ref state);
 					}
-					else if (SystemAPI.HasComponent<PilotTag>(actionEvent.Target))
+					else if (state.EntityManager.HasComponent<PilotTag>(actionEvent.Target))
 					{
+						DropIfCarrying(actionEvent.Source, ref state);
 						Attach(actionEvent.Source, actionEvent.Target, ref state);
+						Pilot(actionEvent.Source, actionEvent.Target, ref state);
 					}
 				}
 				else if (actionEvent.Action == Action.Stop)
@@ -49,7 +52,7 @@ namespace Dustbreaker
 				}
 				else if (actionEvent.Action == Action.Drop)
 				{
-					Drop(actionEvent.Source, actionEvent.Target, ref state);
+					Drop(actionEvent.Source, ref state);
 				}
 			}
 
@@ -63,7 +66,6 @@ namespace Dustbreaker
 			// TODO: set carried item render in front
 
 			state.EntityManager.SetComponentData(source, new CarryComponent { Entity = target });
-			state.EntityManager.SetComponentEnabled<CarryComponent>(source, true);
 
 			PhysicsMass mass = state.EntityManager.GetComponentData<PhysicsMass>(target);
 
@@ -96,14 +98,22 @@ namespace Dustbreaker
 			state.EntityManager.SetComponentData(target, transform);
 		}
 
-		private void Drop(Entity source, Entity target, ref SystemState state)
+		private void DropIfCarrying(Entity source, ref SystemState state)
+		{
+			if (state.EntityManager.GetComponentData<CarryComponent>(source).Entity != Entity.Null)
+			{
+				Drop(source, ref state);
+			}
+		}
+
+		private void Drop(Entity source, ref SystemState state)
 		{
 			// TODO: find safe drop position
 			// TODO: fix flicker on reactivate smoothing
 
+			Entity target = state.EntityManager.GetComponentData<CarryComponent>(source).Entity;
 			state.EntityManager.SetComponentData(source, new CarryComponent { Entity = Entity.Null });
-			state.EntityManager.SetComponentEnabled<CarryComponent>(source, false);
-
+			
 			// restore physics
 			CachedPhysicsProperties properties = state.EntityManager.GetComponentData<CachedPhysicsProperties>(target);
 			state.EntityManager.AddComponentData(target, properties.PhysicsCollider);
@@ -175,6 +185,12 @@ namespace Dustbreaker
 				float3 displacement = state.EntityManager.GetComponentData<EnterExitComponent>(target).ExitDisplacement;
 				DisplaceAttachedEntity(source, target, displacement, ref state);
 			}
+
+			// stop
+			if (state.EntityManager.IsComponentEnabled<DrivingFlag>(source))
+			{
+				state.EntityManager.SetComponentEnabled<DrivingFlag>(source, false);
+			}
 		}
 
 		private void DisplaceAttachedEntity(Entity attached, Entity attach, float3 displacement, ref SystemState state)
@@ -183,6 +199,12 @@ namespace Dustbreaker
 			RigidTransform attachTransform = state.EntityManager.GetComponentData<TrackedParentComponent>(attach).Transform;
 			ref LocalTransform characterTransform = ref SystemAPI.GetComponentRW<LocalTransform>(attached).ValueRW;
 			characterTransform.Position = attachTransform.pos + math.rotate(attachTransform.rot, displacement);
+		}
+
+		private void Pilot(Entity source, Entity target, ref SystemState state)
+		{
+			// TODO: store target (see VehicleInputHandlingSystem)
+			state.EntityManager.SetComponentEnabled<DrivingFlag>(source, true);
 		}
 	}
 }

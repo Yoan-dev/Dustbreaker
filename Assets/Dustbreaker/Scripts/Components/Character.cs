@@ -47,4 +47,6 @@ namespace Dustbreaker
 	}
 
 	public struct AttachedFlag : IComponentData, IEnableableComponent { }
+
+	public struct DrivingFlag : IComponentData, IEnableableComponent { }
 }

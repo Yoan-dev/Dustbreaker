@@ -5,7 +5,7 @@ using Unity.Physics;
 
 namespace Dustbreaker
 {
-	public struct CarryComponent : IComponentData, IEnableableComponent
+	public struct CarryComponent : IComponentData
 	{
 		public Entity Entity;
 	}

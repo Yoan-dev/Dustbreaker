@@ -19,6 +19,9 @@ namespace Dustbreaker
 		[BurstCompile]
 		public void OnUpdate(ref SystemState state)
 		{
+			// TODO: entity specific control instead of global
+			// (currently, control all vehicles at once)
+
 			var input = SystemAPI.GetSingleton<VehicleInputs>();
 
 			foreach (var (speed, steering) in SystemAPI.Query<RefRW<VehicleSpeed>, RefRW<VehicleSteering>>())

@@ -20,7 +20,6 @@ namespace Dustbreaker
 				if (authoring.CanCarry)
 				{
 					AddComponent<CarryComponent>(entity);
-					SetComponentEnabled<CarryComponent>(entity, false);
 				}
 			}
 		}

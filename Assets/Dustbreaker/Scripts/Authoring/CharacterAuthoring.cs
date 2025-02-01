@@ -52,7 +52,9 @@ namespace Dustbreaker
 
 				AddComponent<AttachedComponent>(entity);
 				AddComponent<AttachedFlag>(entity);
-				SetComponentEnabled< AttachedFlag>(entity, false);
+				SetComponentEnabled<AttachedFlag>(entity, false);
+				AddComponent<DrivingFlag>(entity);
+				SetComponentEnabled<DrivingFlag>(entity, false);
 			}
 		}
 	}

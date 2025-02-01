@@ -43,7 +43,7 @@ namespace Dustbreaker
 		{
 			uint tick = SystemAPI.GetSingleton<FixedTickSystem.Singleton>().Tick;
 
-			foreach (var playerInputs in SystemAPI.Query<RefRW<PlayerInputs>>())
+			foreach (var (playerInputs, drivingFlag) in SystemAPI.Query<RefRW<PlayerInputs>, EnabledRefRO<DrivingFlag>>().WithPresent<DrivingFlag>())
 			{
 				if (_ignoreInput)
 				{
@@ -52,15 +52,17 @@ namespace Dustbreaker
 					continue;
 				}
 
+				bool isDriving = drivingFlag.ValueRO;
+
 				playerInputs.ValueRW.MoveInput = new float2
 				{
-					x = (Input.GetKey(KeyCode.D) ? 1f : 0f) + (Input.GetKey(KeyCode.A) ? -1f : 0f),
-					y = (Input.GetKey(KeyCode.W) ? 1f : 0f) + (Input.GetKey(KeyCode.S) ? -1f : 0f),
+					x = isDriving ? 0f : (Input.GetKey(KeyCode.D) ? 1f : 0f) + (Input.GetKey(KeyCode.A) ? -1f : 0f),
+					y = isDriving ? 0f : (Input.GetKey(KeyCode.W) ? 1f : 0f) + (Input.GetKey(KeyCode.S) ? -1f : 0f),
 				};
 
 				playerInputs.ValueRW.LookInput = new float2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
 
-				if (Input.GetKeyDown(KeyCode.Space))
+				if (!isDriving && Input.GetKeyDown(KeyCode.Space))
 				{
 					playerInputs.ValueRW.JumpPressed.Set(tick);
 				}
@@ -91,18 +93,18 @@ namespace Dustbreaker
 				_autoPilot = !_autoPilot;
 			}
 
-			// vehicle (temp)
-			foreach (var vehicleInputs in SystemAPI.Query<RefRW<VehicleInputs>>())
+			// vehicle
+			foreach (var vehicleInputs in SystemAPI.Query<RefRW<VehicleInputs>>().WithAll<DrivingFlag>())
 			{
 				if (_ignoreInput)
 				{
 					vehicleInputs.ValueRW.Steering = 0f;
-					vehicleInputs.ValueRW.Throttle = 0f;
+					vehicleInputs.ValueRW.Throttle = _autoPilot ? 1f : 0f;
 					continue;
 				}
 
-				vehicleInputs.ValueRW.Steering = (Input.GetKey(KeyCode.RightArrow) ? 1f : 0f) + (Input.GetKey(KeyCode.LeftArrow) ? -1f : 0f);
-				vehicleInputs.ValueRW.Throttle = (Input.GetKey(KeyCode.UpArrow) ? 1f : _autoPilot ? 1f : 0f) + (Input.GetKey(KeyCode.DownArrow) ? -1f : 0f);
+				vehicleInputs.ValueRW.Steering = (Input.GetKey(KeyCode.D) ? 1f : 0f) + (Input.GetKey(KeyCode.A) ? -1f : 0f);
+				vehicleInputs.ValueRW.Throttle = (Input.GetKey(KeyCode.W) ? 1f : _autoPilot ? 1f : 0f) + (Input.GetKey(KeyCode.S) ? -1f : 0f);
 			}
 		}
 	}
@@ -177,21 +179,27 @@ namespace Dustbreaker
 			}
 
 			// Interaction
-			foreach (var (playerInputs, character, carry, interactionControllerRW, interactionFlagRW) in 
-				SystemAPI.Query<PlayerInputs, CharacterComponent, CarryComponent, RefRW<InteractionController>, EnabledRefRW<InteractionFlag>>().WithPresent<InteractionFlag, CarryComponent>().WithAll<Simulate>())
+			foreach (var (playerInputs, character, carry, interactionControllerRW, interactionFlag, drivingFlag) in 
+				SystemAPI.Query<PlayerInputs, CharacterComponent, CarryComponent, RefRW<InteractionController>, EnabledRefRW<InteractionFlag>, EnabledRefRO<DrivingFlag>>().WithPresent<InteractionFlag, DrivingFlag>().WithAll<Simulate>())
 			{
 				ref InteractionController interactionController = ref interactionControllerRW.ValueRW;
-				
+
 				if (playerInputs.StopPressed.IsSet(tick))
 				{
 					interactionController.Interaction = Action.Stop;
-					interactionFlagRW.ValueRW = true;
+					interactionFlag.ValueRW = true;
+				}
+				else if (drivingFlag.ValueRO)
+				{
+					// don't interact and drive
+					interactionController.Target = Entity.Null;
+					interactionController.Interaction = Action.None;
+					interactionFlag.ValueRW = false;
 				}
 				else if (playerInputs.DropPressed.IsSet(tick) && carry.Entity != Entity.Null)
 				{
-					interactionController.Target = carry.Entity;
 					interactionController.Interaction = Action.Drop;
-					interactionFlagRW.ValueRW = true;
+					interactionFlag.ValueRW = true;
 				}
 				else
 				{
@@ -230,19 +238,19 @@ namespace Dustbreaker
 						if (playerInputs.PrimaryInteractionPressed.IsSet(tick))
 						{
 							interactionController.Interaction = interactable.GetPrimaryInteraction();
-							interactionFlagRW.ValueRW = true;
+							interactionFlag.ValueRW = true;
 						}
 						else if (playerInputs.SecondaryInteractionPressed.IsSet(tick))
 						{
 							interactionController.Interaction = interactable.GetSecondaryInteraction();
-							interactionFlagRW.ValueRW = true;
+							interactionFlag.ValueRW = true;
 						}
 					}
 					else
 					{
 						interactionController.Target = Entity.Null;
 						interactionController.Interaction = Action.None;
-						interactionFlagRW.ValueRW = false;
+						interactionFlag.ValueRW = false;
 					}
 				}
 			}

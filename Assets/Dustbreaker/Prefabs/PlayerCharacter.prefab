@@ -166,7 +166,7 @@ MonoBehaviour:
   GroundMaxSpeed: 3.4
   GroundedMovementSharpness: 15
   AirDrag: 0
-  JumpSpeed: 5
+  JumpSpeed: 6
   Gravity:
     x: -0
     y: -30
