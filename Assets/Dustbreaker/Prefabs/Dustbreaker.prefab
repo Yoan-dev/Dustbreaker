@@ -2906,6 +2906,8 @@ MonoBehaviour:
   driveWheels:
   - {fileID: 1982256180250617010}
   - {fileID: 6657378874317609636}
+  - {fileID: 9079627678138301331}
+  - {fileID: 3276937510470704178}
   - {fileID: 6505208433223104666}
   - {fileID: 627556937900495581}
   drawDebugInformation: 0
@@ -2935,7 +2937,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_MotionType: 0
   m_Smoothing: 1
-  m_Mass: 2000
+  m_Mass: 3000
   m_LinearDamping: 0.01
   m_AngularDamping: 0.05
   m_InitialLinearVelocity:
@@ -2959,9 +2961,9 @@ MonoBehaviour:
       z: 0
     RotationOrder: 4
   m_InertiaTensor:
-    x: 1.2
-    y: 1.2
-    z: 1.8
+    x: 3
+    y: 3
+    z: 3
   m_WorldIndex: 0
   m_CustomTags:
     Tag00: 0
