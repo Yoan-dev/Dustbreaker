@@ -58,4 +58,10 @@ namespace Dustbreaker
 		public byte UsedForDriving;
 		public RigidTransform ChassisFromSuspension;
 	}
+
+	public struct StandstillComponent : IComponentData
+	{
+		public float CachedInverseMass;
+		public float3 CachedInverseInertia;
+	}
 }
