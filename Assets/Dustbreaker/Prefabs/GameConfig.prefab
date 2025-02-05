@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GameConfig:
-    TravelDistance: 100
+    TravelDistance: 75
   StreamingConfig:
     StreamingRange: 384
     QuadrantSize: 128
