@@ -44,6 +44,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f9d9c41b46e7104fa0610866fbbc8f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  GameConfig:
+    TravelDistance: 100
   StreamingConfig:
     StreamingRange: 384
     QuadrantSize: 128
+  CharacterPrefab: {fileID: 1555240849038293811, guid: e95be3f6ef9cc8243994bdcda968a0e5, type: 3}
+  ColonyPrefab: {fileID: 3491842725734692128, guid: 8d55f39caaed0c345b7e9669a4a2e56c, type: 3}
+  DustbreakerPrefab: {fileID: 3643566946202686717, guid: a61505fc618bb2c498cda7fc20e57fa7, type: 3}
+  MainDeliveryPrefab: {fileID: 9075996621917975856, guid: 0f9819b011d42614caccfab7b4745f9d, type: 3}
