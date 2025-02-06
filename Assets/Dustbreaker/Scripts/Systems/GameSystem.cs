@@ -40,10 +40,11 @@ namespace Dustbreaker
 
 			// main mission
 			Entity mainMission = state.EntityManager.CreateEntity();
-			state.EntityManager.AddComponentData(mainDelivery, new MissionReference { Entity = mainMission });
+			state.EntityManager.AddComponentData(mainMission, new MissionComponent { Type = MissionType.Delivery });
 			state.EntityManager.AddComponentData(mainMission, new ItemReference { Entity = mainDelivery });
 			state.EntityManager.AddComponentData(mainMission, new LocationReference { Entity = endColony });
 			state.EntityManager.AddComponent<MainMissionTag>(mainMission);
+			state.EntityManager.AddComponentData(mainDelivery, new MissionReference { Entity = mainMission });
 
 			state.Enabled = false;
 		}

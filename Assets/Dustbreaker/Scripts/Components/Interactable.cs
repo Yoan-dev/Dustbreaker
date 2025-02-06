@@ -1,32 +1,43 @@
 using System;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Physics;
 
 namespace Dustbreaker
 {
-	public struct CarryComponent : IComponentData
+	public struct InteractionController : IComponentData
 	{
-		public Entity Entity;
+		public Entity Target;
+		public Action Interaction;
 	}
 
-	public struct PickableTag : IComponentData { }
+	public struct InteractionFlag : IComponentData, IEnableableComponent { }
+
+	[Serializable]
+	public struct InteractableComponent : IComponentData
+	{
+		public Action Actions;
+
+		public bool HasAction(Action action)
+		{
+			return (Actions & action) != 0;
+		}
+
+		public Action GetPrimaryInteraction()
+		{
+			return HasAction(Action.Use) ? Action.Use : Action.None;
+		}
+
+		public Action GetSecondaryInteraction()
+		{
+			return HasAction(Action.Pick) ? Action.Pick : Action.None;
+		}
+	}
 
 	public struct ClimbableTag : IComponentData { }
 
 	public struct PilotTag : IComponentData { }
 
-	public struct CachedPhysicsProperties : IComponentData
-	{
-		public PhysicsCollider PhysicsCollider;
-		public float3 InverseInertia;
-		public float InverseMass;
-	}
-
-	public struct TrackedParentComponent : IComponentData
-	{
-		public RigidTransform Transform;
-	}
+	public struct DeliverTag : IComponentData { }
 
 	[Serializable]
 	public struct EnterExitComponent : IComponentData

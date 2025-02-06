@@ -8,9 +8,11 @@ namespace Dustbreaker
 	{
 		public InteractableComponent Interactable;
 
+		// TODO: usage enum
 		[Header("Usage")]
 		public bool Ladder;
 		public bool Pilot;
+		public bool Deliver;
 
 		public class Baker : Baker<InteractableAuthoring>
 		{
@@ -33,6 +35,10 @@ namespace Dustbreaker
 				{
 					AddComponent<PilotTag>(entity);
 					AddComponent<TrackedParentComponent>(entity);
+				}
+				else if (authoring.Deliver)
+				{
+					AddComponent<DeliverTag>(entity);
 				}
 			}
 		}

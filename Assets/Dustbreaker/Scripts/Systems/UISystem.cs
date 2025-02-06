@@ -29,7 +29,17 @@ namespace Dustbreaker
 				secondaryInteraction = interactable.GetSecondaryInteraction();
 			}
 
-			HUDController.Instance.UpdateHUD(primaryInteraction, secondaryInteraction);
+			HUDController.Instance.UpdateInteraction(primaryInteraction, secondaryInteraction);
+
+			bool missionsChanged = true; // temp
+			if (missionsChanged)
+			{
+				HUDController.Instance.ClearMissions();
+				foreach (var (mission, entity) in SystemAPI.Query<MissionComponent>().WithNone<SuccessTag>().WithEntityAccess())
+				{
+					HUDController.Instance.AddMission(entity, mission.Type, state.EntityManager);
+				}
+			}
 		}
 	}
 }

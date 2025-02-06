@@ -9,17 +9,19 @@ namespace Dustbreaker
 		Repair,
 	}
 
+	public enum RewardType
+	{
+		None = 0,
+		Item,
+		BarterValue,
+	}
+
+	public struct MissionComponent : IComponentData
+	{
+		public MissionType Type;
+	}
+
 	public struct MissionReference : IComponentData
-	{
-		public Entity Entity;
-	}
-
-	public struct ItemReference : IComponentData
-	{
-		public Entity Entity;
-	}
-
-	public struct LocationReference : IComponentData
 	{
 		public Entity Entity;
 	}
@@ -27,14 +29,18 @@ namespace Dustbreaker
 	[InternalBufferCapacity(0)]
 	public struct DeliveryElement : IBufferElementData
 	{
-		// TODO: item id/type
+		public int ExternalId; // TBD
 		public int Count;
 	}
 
 	public struct RewardComponent : IComponentData
 	{
-		public int Value;
+		public RewardType Type;
+		public int ExternalId; // TBD
+		public int Count;
 	}
+
+	public struct SuccessTag : IComponentData { }
 
 	public struct MainMissionTag : IComponentData { }
 }

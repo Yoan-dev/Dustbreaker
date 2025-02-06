@@ -6,7 +6,6 @@ using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.GraphicsIntegration;
 using Unity.Transforms;
-using static UnityEngine.InputSystem.PlayerInput;
 
 namespace Dustbreaker
 {
@@ -30,16 +29,21 @@ namespace Dustbreaker
 
 				if (actionEvent.Action == Action.Use)
 				{
-					// TBD: usage flag instead of tag (or both)
+					// TODO/TBD: usage enum instead of tag (or both)
 					if (state.EntityManager.HasComponent<ClimbableTag>(actionEvent.Target))
 					{
 						Attach(actionEvent.Source, actionEvent.Target, ref state);
+						//Climb(actionEvent.Source, actionEvent.Target, ref state);
 					}
 					else if (state.EntityManager.HasComponent<PilotTag>(actionEvent.Target))
 					{
 						DropIfCarrying(actionEvent.Source, ref state);
 						Attach(actionEvent.Source, actionEvent.Target, ref state);
 						Pilot(actionEvent.Source, actionEvent.Target, ref state);
+					}
+					else if (state.EntityManager.HasComponent<DeliverTag>(actionEvent.Target))
+					{
+						Deliver(actionEvent.Source, actionEvent.Target, ref state);
 					}
 				}
 				else if (actionEvent.Action == Action.Stop)
@@ -214,6 +218,29 @@ namespace Dustbreaker
 		{
 			// TODO: store target (see VehicleInputHandlingSystem)
 			state.EntityManager.SetComponentEnabled<DrivingFlag>(source, true);
+		}
+
+		private void Deliver(Entity source, Entity target, ref SystemState state)
+		{
+			Entity item = state.EntityManager.GetComponentData<CarryComponent>(source).Entity;
+			if (item == Entity.Null) return;
+
+			if (state.EntityManager.HasComponent<MissionReference>(item))
+			{
+				Entity mission = state.EntityManager.GetComponentData<MissionReference>(item).Entity;
+				Entity currentLocation = state.EntityManager.GetComponentData<LocationReference>(target).Entity;
+				Entity missionLocation = state.EntityManager.GetComponentData<LocationReference>(mission).Entity;
+
+				if (currentLocation == missionLocation)
+				{
+					state.EntityManager.AddComponent<SuccessTag>(mission);
+				}
+				// TODO: prevent delivering unique item if not in mission location
+			}
+
+			// TODO: keep entity (soft destroy)
+			state.EntityManager.DestroyEntity(item);
+			state.EntityManager.SetComponentData(source, new CarryComponent { Entity = Entity.Null });
 		}
 	}
 }

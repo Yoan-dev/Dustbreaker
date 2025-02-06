@@ -64,4 +64,9 @@ namespace Dustbreaker
 		public float CachedInverseMass;
 		public float3 CachedInverseInertia;
 	}
+
+	public struct TrackedParentComponent : IComponentData
+	{
+		public RigidTransform Transform;
+	}
 }
