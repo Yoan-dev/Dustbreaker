@@ -35,9 +35,9 @@ namespace Dustbreaker
 			if (missionsChanged)
 			{
 				HUDController.Instance.ClearMissions();
-				foreach (var (mission, entity) in SystemAPI.Query<MissionComponent>().WithNone<SuccessTag>().WithEntityAccess())
+				foreach (var (mission, entity) in SystemAPI.Query<RefRO<MissionComponent>>().WithNone<SuccessTag>().WithEntityAccess())
 				{
-					HUDController.Instance.AddMission(entity, mission.Type, state.EntityManager);
+					HUDController.Instance.AddMission(entity, mission.ValueRO.Type, state.EntityManager);
 				}
 			}
 		}

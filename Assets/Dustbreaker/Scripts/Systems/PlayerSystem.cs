@@ -120,9 +120,9 @@ namespace Dustbreaker
 		[BurstCompile]
 		public void OnUpdate(ref SystemState state)
 		{
-			foreach (var (playerInputs, characterControlRW) in SystemAPI.Query<PlayerInputs, RefRW<CharacterControl>>().WithAll<Simulate>())
+			foreach (var (playerInputs, characterControlRW) in SystemAPI.Query<RefRO<PlayerInputs>, RefRW<CharacterControl>>().WithAll<Simulate>())
 			{
-				characterControlRW.ValueRW.LookDegreesDelta = playerInputs.LookInput;
+				characterControlRW.ValueRW.LookDegreesDelta = playerInputs.ValueRO.LookInput;
 			}
 		}
 	}
@@ -157,28 +157,28 @@ namespace Dustbreaker
 			CollisionWorld collisionWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
 
 			// Movement
-			foreach (var (playerInputs, localTransform, characterControlRW) in SystemAPI.Query<PlayerInputs, LocalTransform, RefRW<CharacterControl>>().WithAll<Simulate>())
+			foreach (var (playerInputs, localTransform, characterControlRW) in SystemAPI.Query<RefRO<PlayerInputs>, RefRO<LocalTransform>, RefRW<CharacterControl>>().WithAll<Simulate>())
 			{
 				ref CharacterControl characterControl = ref characterControlRW.ValueRW;
-				quaternion characterRotation = localTransform.Rotation;
+				quaternion characterRotation = localTransform.ValueRO.Rotation;
 
 				// Move
 				float3 characterForward = MathUtilities.GetForwardFromRotation(characterRotation);
 				float3 characterRight = MathUtilities.GetRightFromRotation(characterRotation);
-				characterControl.MoveVector = (playerInputs.MoveInput.y * characterForward) + (playerInputs.MoveInput.x * characterRight);
+				characterControl.MoveVector = (playerInputs.ValueRO.MoveInput.y * characterForward) + (playerInputs.ValueRO.MoveInput.x * characterRight);
 				characterControl.MoveVector = MathUtilities.ClampToMaxLength(characterControl.MoveVector, 1f);
 
 				// Jump
-				characterControl.Jump = playerInputs.JumpPressed.IsSet(tick);
+				characterControl.Jump = playerInputs.ValueRO.JumpPressed.IsSet(tick);
 			}
 
 			// Interaction
 			foreach (var (playerInputs, character, carry, interactionControllerRW, interactionFlag, drivingFlag) in 
-				SystemAPI.Query<PlayerInputs, CharacterComponent, CarryComponent, RefRW<InteractionController>, EnabledRefRW<InteractionFlag>, EnabledRefRO<DrivingFlag>>().WithPresent<InteractionFlag, DrivingFlag>().WithAll<Simulate>())
+				SystemAPI.Query<RefRO<PlayerInputs>, RefRO<CharacterComponent>, RefRO<CarryComponent>, RefRW<InteractionController>, EnabledRefRW<InteractionFlag>, EnabledRefRO<DrivingFlag>>().WithPresent<InteractionFlag, DrivingFlag>().WithAll<Simulate>())
 			{
 				ref InteractionController interactionController = ref interactionControllerRW.ValueRW;
 
-				if (playerInputs.StopPressed.IsSet(tick))
+				if (playerInputs.ValueRO.StopPressed.IsSet(tick))
 				{
 					interactionController.Interaction = Action.Stop;
 					interactionFlag.ValueRW = true;
@@ -190,16 +190,16 @@ namespace Dustbreaker
 					interactionController.Interaction = Action.None;
 					interactionFlag.ValueRW = false;
 				}
-				else if (playerInputs.DropPressed.IsSet(tick) && carry.Entity != Entity.Null)
+				else if (playerInputs.ValueRO.DropPressed.IsSet(tick) && carry.ValueRO.Entity != Entity.Null)
 				{
 					interactionController.Interaction = Action.Drop;
 					interactionFlag.ValueRW = true;
 				}
 				else
 				{
-					LocalToWorld viewLocalToWorld = SystemAPI.GetComponent<LocalToWorld>(character.ViewEntity);
+					LocalToWorld viewLocalToWorld = SystemAPI.GetComponent<LocalToWorld>(character.ValueRO.ViewEntity);
 					float3 start = viewLocalToWorld.Position;
-					float3 end = start + viewLocalToWorld.Forward * character.InteractionRange;
+					float3 end = start + viewLocalToWorld.Forward * character.ValueRO.InteractionRange;
 
 					RaycastInput raycastInput = new RaycastInput
 					{
@@ -208,7 +208,7 @@ namespace Dustbreaker
 						Filter = _interactionFilter,
 					};
 
-					if (collisionWorld.CastRay(raycastInput, out Unity.Physics.RaycastHit closestHit) && closestHit.Entity != carry.Entity)
+					if (collisionWorld.CastRay(raycastInput, out Unity.Physics.RaycastHit closestHit) && closestHit.Entity != carry.ValueRO.Entity)
 					{
 						// retrieve child interactable if compound collider
 						if (SystemAPI.HasBuffer<PhysicsColliderKeyEntityPair>(closestHit.Entity))
@@ -229,12 +229,12 @@ namespace Dustbreaker
 						// we assume the target has an interactable component
 						InteractableComponent interactable = SystemAPI.GetComponent<InteractableComponent>(interactionController.Target);
 
-						if (playerInputs.PrimaryInteractionPressed.IsSet(tick))
+						if (playerInputs.ValueRO.PrimaryInteractionPressed.IsSet(tick))
 						{
 							interactionController.Interaction = interactable.GetPrimaryInteraction();
 							interactionFlag.ValueRW = true;
 						}
-						else if (playerInputs.SecondaryInteractionPressed.IsSet(tick))
+						else if (playerInputs.ValueRO.SecondaryInteractionPressed.IsSet(tick))
 						{
 							interactionController.Interaction = interactable.GetSecondaryInteraction();
 							interactionFlag.ValueRW = true;
