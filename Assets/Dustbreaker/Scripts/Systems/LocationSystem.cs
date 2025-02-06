@@ -60,12 +60,13 @@ namespace Dustbreaker
 
 			public void Execute(Entity entity, in DynamicBuffer<SpawnPoint> spawnPoints, in LocalTransform localTransform)
 			{
+				Matrix4x4 matrix = localTransform.ToMatrix();
 				for (int i = 0; i < spawnPoints.Length; i++)
 				{
 					SpawnPoint spawnPoint = spawnPoints[i];
 					SpawnQueue.Enqueue(new LocationSpawnEvent
 					{
-						Transform = LocalTransform.FromMatrix(math.mul(localTransform.ToMatrix(), new float4x4(spawnPoint.Rotation, spawnPoint.Position))),
+						Transform = LocalTransform.FromMatrix(math.mul(matrix, new float4x4(spawnPoint.Rotation, spawnPoint.Position))),
 						Location = entity,
 						Prefab = spawnPoint.Prefab,
 					});
