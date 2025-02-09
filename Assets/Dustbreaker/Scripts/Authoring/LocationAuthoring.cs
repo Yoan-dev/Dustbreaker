@@ -17,6 +17,8 @@ namespace Dustbreaker
 	public class LocationAuthoring : MonoBehaviour
 	{
 		public SpawnPointManaged[] SpawnAnchors = new SpawnPointManaged[0];
+		public bool HasStorage;
+		public float3 StoragePosition;
 
 		public class Baker : Baker<LocationAuthoring>
 		{
@@ -24,6 +26,11 @@ namespace Dustbreaker
 			{
 				Entity entity = GetEntity(TransformUsageFlags.Dynamic);
 				AddComponent<LocationTag>(entity);
+
+				if (authoring.HasStorage)
+				{
+					AddComponent(entity, new StorageComponent { Position = authoring.StoragePosition });
+				}
 
 				DynamicBuffer<SpawnPoint> spawnPoints = AddBuffer<SpawnPoint>(entity);
 				for (int i = 0; i < authoring.SpawnAnchors.Length; i++)

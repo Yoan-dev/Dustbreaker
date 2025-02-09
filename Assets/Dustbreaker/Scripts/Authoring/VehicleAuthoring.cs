@@ -30,7 +30,7 @@ namespace Dustbreaker
 				var entity = GetEntity(TransformUsageFlags.Dynamic);
 
 				AddComponent<VehicleTag>(entity);
-				AddComponent<StandstillComponent>(entity);
+				AddComponent<CachedPhysicsMass>(entity);
 
 				AddComponent(entity, new VehicleSpeed
 				{

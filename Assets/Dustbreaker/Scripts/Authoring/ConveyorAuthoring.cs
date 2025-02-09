@@ -8,20 +8,20 @@ namespace Dustbreaker
 	public class ConveyorAuthoring : MonoBehaviour
 	{
 		[Header("Conveyor Belt")]
-		public bool ConveyorBelt;
-		public float3 ConveyorBeltCenter;
-		public float3 ConveyorBeltRotation;
-		public float3 ConveyorBeltSize;
-		public float ConveyorBeltStrength;
+		public bool IsConveyorBelt;
+		public float3 BeltCenter;
+		public float3 BeltRotation;
+		public float3 BeltSize;
+		public float BeltStrength;
 
 		[Header("Storage")]
-		public bool Storage;
+		public bool IsStorage;
 		public float3 StorageCenter;
 		public float3 StorageRotation;
 		public float3 StorageSize;
 
 		[Header("Item Spawner")]
-		public bool ItemSpawner;
+		public bool IsItemSpawner;
 		public float3 ItemSpawnerPosition;
 		public float3 ItemSpawnerRotation;
 
@@ -32,28 +32,28 @@ namespace Dustbreaker
 				Entity entity = GetEntity(TransformUsageFlags.Dynamic);
 				AddComponent<LocationReference>(entity);
 
-				if (authoring.ConveyorBelt)
+				if (authoring.IsConveyorBelt)
 				{
 					AddComponent(entity,new ConveyorBeltComponent
 					{
-						Center = authoring.ConveyorBeltCenter,
-						Rotation = quaternion.Euler(math.radians(authoring.ConveyorBeltRotation)),
-						Size = authoring.ConveyorBeltSize,
-						Strength = authoring.ConveyorBeltStrength,
+						Center = authoring.BeltCenter,
+						Rotation = quaternion.Euler(math.radians(authoring.BeltRotation)),
+						Size = authoring.BeltSize,
+						Strength = authoring.BeltStrength,
 					});
 				}
 
-				if (authoring.Storage)
+				if (authoring.IsStorage)
 				{
-					AddComponent(entity, new StorageComponent
+					AddComponent(entity, new ConveyorStorageComponent
 					{
-						Position = authoring.StorageCenter,
+						Center = authoring.StorageCenter,
 						Rotation = quaternion.Euler(math.radians(authoring.StorageRotation)),
 						Size = authoring.StorageSize,
 					});
 				}
 
-				if (authoring.ItemSpawner)
+				if (authoring.IsItemSpawner)
 				{
 					AddComponent(entity, new ItemSpawnerComponent
 					{

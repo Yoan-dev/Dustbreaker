@@ -5,11 +5,13 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
 using Unity.Physics.GraphicsIntegration;
+using Unity.Physics.Systems;
 using Unity.Transforms;
 
 namespace Dustbreaker
 {
 	[UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
+	[UpdateBefore(typeof(PhysicsSystemGroup))]
 	public partial struct ActionSystem : ISystem
 	{
 		[BurstCompile]
@@ -71,25 +73,18 @@ namespace Dustbreaker
 
 			state.EntityManager.SetComponentData(source, new CarryComponent { Entity = target });
 
-			PhysicsMass mass = state.EntityManager.GetComponentData<PhysicsMass>(target);
-
-			// create physics cache
-			state.EntityManager.AddComponentData(target, new CachedPhysicsProperties
+			// set physics cache
+			state.EntityManager.SetComponentData(target, new CachedPhysicsCollider
 			{
-				PhysicsCollider = state.EntityManager.GetComponentData<PhysicsCollider>(target),
-				InverseInertia = mass.InverseInertia,
-				InverseMass = mass.InverseMass,
+				Value = state.EntityManager.GetComponentData<PhysicsCollider>(target),
 			});
 
-			// set kinematic
-			mass.InverseMass = 0f;
-			mass.InverseInertia = float3.zero;
-			state.EntityManager.SetComponentData(target, mass);
-
 			// stop physics
+			// TODO: change physics collider reference instead of remove/cache/add component
 			state.EntityManager.SetComponentData(target, new PhysicsVelocity());
 			state.EntityManager.RemoveComponent<PhysicsCollider>(target);
 			state.EntityManager.RemoveComponent<PhysicsGraphicalSmoothing>(target); // temp
+			state.EntityManager.SetComponentEnabled<SwitchToKinematicFlag>(target, true);
 
 			// parenting
 			state.EntityManager.GetBuffer<Child>(source).Add(new Child { Value = target });
@@ -117,25 +112,18 @@ namespace Dustbreaker
 
 			Entity target = state.EntityManager.GetComponentData<CarryComponent>(source).Entity;
 			state.EntityManager.SetComponentData(source, new CarryComponent { Entity = Entity.Null });
-			
-			// restore physics
-			CachedPhysicsProperties properties = state.EntityManager.GetComponentData<CachedPhysicsProperties>(target);
-			state.EntityManager.AddComponentData(target, properties.PhysicsCollider);
-			state.EntityManager.AddComponentData(target, new PhysicsGraphicalSmoothing { ApplySmoothing = 1 }); // temp
 
-			// set dynamic
-			PhysicsMass mass = state.EntityManager.GetComponentData<PhysicsMass>(target);
-			mass.InverseMass = properties.InverseMass;
-			mass.InverseInertia = properties.InverseInertia;
-			state.EntityManager.SetComponentData(target, mass);
+			// restore physics
+			// TODO: change physics collider reference instead of remove/cache/add component
+			CachedPhysicsCollider cachedCollider = state.EntityManager.GetComponentData<CachedPhysicsCollider>(target);
+			state.EntityManager.AddComponentData(target, cachedCollider.Value);
+			state.EntityManager.AddComponentData(target, new PhysicsGraphicalSmoothing { ApplySmoothing = 1 }); // temp
+			state.EntityManager.SetComponentEnabled<SwitchToDynamicFlag>(target, true);
 
 			// transfer velocity
 			KinematicCharacterBody characterBody = state.EntityManager.GetComponentData<KinematicCharacterBody>(source);
 			float3 characterVelocity = characterBody.RelativeVelocity + characterBody.ParentVelocity;
 			state.EntityManager.SetComponentData(target, new PhysicsVelocity { Linear = characterVelocity });
-
-			// remove physics cache
-			state.EntityManager.RemoveComponent<CachedPhysicsProperties>(target);
 
 			// parenting
 			DynamicBuffer<Child> children = SystemAPI.GetBuffer<Child>(source);

@@ -27,11 +27,16 @@ namespace Dustbreaker
 		public float Strength;
 	}
 
-	public struct StorageComponent : IComponentData
+	public struct ConveyorStorageComponent : IComponentData
 	{
 		public quaternion Rotation;
-		public float3 Position;
+		public float3 Center;
 		public float3 Size;
+	}
+
+	public struct StorageComponent : IComponentData
+	{
+		public float3 Position;
 	}
 
 	public struct ItemSpawnerComponent : IComponentData

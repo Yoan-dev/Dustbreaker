@@ -37,11 +37,11 @@ namespace Dustbreaker
 		[BurstCompile]
 		public void OnUpdate(ref SystemState state)
 		{
+			state.Dependency = new StorageInitJob().ScheduleParallel(state.Dependency);
+
 			state.Dependency = new SpawnPointsJob { SpawnQueue = _spawnQueue.AsParallelWriter() }.ScheduleParallel(state.Dependency);
 
 			state.Dependency.Complete();
-
-			state.EntityManager.RemoveComponent<SpawnPoint>(_query);
 
 			while (_spawnQueue.Count > 0)
 			{
@@ -49,6 +49,19 @@ namespace Dustbreaker
 				Entity entity = state.EntityManager.Instantiate(spawnEvent.Prefab);
 				state.EntityManager.SetComponentData(entity, spawnEvent.Transform);
 				state.EntityManager.SetComponentData(entity, new LocationReference { Entity = spawnEvent.Location });
+			}
+
+			state.EntityManager.RemoveComponent<SpawnPoint>(_query);
+		}
+
+		// TODO: reassess using SpawnPoint as init flag (no spawn point location with storage ?)
+		[BurstCompile]
+		[WithAll(typeof(SpawnPoint))]
+		private partial struct StorageInitJob : IJobEntity
+		{
+			public void Execute(ref StorageComponent storage, in LocalTransform localTransform)
+			{
+				storage.Position = localTransform.TransformPoint(storage.Position);
 			}
 		}
 

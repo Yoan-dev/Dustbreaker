@@ -16,11 +16,4 @@ namespace Dustbreaker
 	}
 
 	public struct PickableTag : IComponentData { }
-
-	public struct CachedPhysicsProperties : IComponentData
-	{
-		public PhysicsCollider PhysicsCollider;
-		public float3 InverseInertia;
-		public float InverseMass;
-	}
 }

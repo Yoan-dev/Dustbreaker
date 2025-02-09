@@ -277,6 +277,7 @@ namespace Dustbreaker
 			}
 		}
 	}
+
 	[UpdateInGroup(typeof(AfterPhysicsSystemGroup))]
 	public partial struct VehicleStandstillSystem : ISystem
 	{
@@ -289,7 +290,7 @@ namespace Dustbreaker
 		[BurstCompile]
 		public partial struct VehicleStandstillJob : IJobEntity
 		{
-			public void Execute(ref PhysicsVelocity velocity, ref PhysicsMass mass, ref StandstillComponent standstill, in VehicleSpeed speed, in VehicleSteering steering)
+			public void Execute(ref PhysicsVelocity velocity, ref PhysicsMass mass, ref CachedPhysicsMass cachedMass, in VehicleSpeed speed, in VehicleSteering steering)
 			{
 				bool isMoving = math.length(velocity.Linear) > 0.1f || math.length(velocity.Angular) > 0.003f;
 				bool isDriving = math.abs(speed.DesiredSpeed) > 0.1f || math.abs(steering.DesiredSteeringAngle) > 0.03f;
@@ -302,8 +303,8 @@ namespace Dustbreaker
 				if (!mass.IsKinematic && !isMoving && !isDriving)
 				{
 					// switch to kinematic
-					standstill.CachedInverseMass = mass.InverseMass;
-					standstill.CachedInverseInertia = mass.InverseInertia;
+					cachedMass.InverseMass = mass.InverseMass;
+					cachedMass.InverseInertia = mass.InverseInertia;
 					mass.InverseMass = 0f;
 					mass.InverseInertia = float3.zero;
 					velocity.Linear = float3.zero;
@@ -312,8 +313,8 @@ namespace Dustbreaker
 				else if (mass.IsKinematic && isDriving)
 				{
 					// go back to dynamic
-					mass.InverseMass = standstill.CachedInverseMass;
-					mass.InverseInertia = standstill.CachedInverseInertia;
+					mass.InverseMass = cachedMass.InverseMass;
+					mass.InverseInertia = cachedMass.InverseInertia;
 				}
 			}
 		}

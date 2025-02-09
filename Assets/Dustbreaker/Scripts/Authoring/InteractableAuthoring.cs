@@ -27,6 +27,12 @@ namespace Dustbreaker
 				if (authoring.Interactable.HasAction(Action.Pick))
 				{
 					AddComponent<PickableTag>(entity);
+					AddComponent<CachedPhysicsCollider>(entity);
+					AddComponent<CachedPhysicsMass>(entity);
+					AddComponent<SwitchToKinematicFlag>(entity);
+					AddComponent<SwitchToDynamicFlag>(entity);
+					SetComponentEnabled<SwitchToKinematicFlag>(entity, false);
+					SetComponentEnabled<SwitchToDynamicFlag>(entity, false);
 				}
 
 				if (authoring.Ladder)

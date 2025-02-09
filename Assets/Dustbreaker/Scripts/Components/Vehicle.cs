@@ -59,12 +59,6 @@ namespace Dustbreaker
 		public RigidTransform ChassisFromSuspension;
 	}
 
-	public struct StandstillComponent : IComponentData
-	{
-		public float CachedInverseMass;
-		public float3 CachedInverseInertia;
-	}
-
 	public struct TrackedParentComponent : IComponentData
 	{
 		public RigidTransform Transform;

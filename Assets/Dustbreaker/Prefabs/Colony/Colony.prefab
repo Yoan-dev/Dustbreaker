@@ -1226,6 +1226,11 @@ MonoBehaviour:
       y: 270
       z: 0
     Prefab: {fileID: 1529638925606814422, guid: e2930cd2764176c4ebfd6ba8078730c0, type: 3}
+  HasStorage: 1
+  StoragePosition:
+    x: 8
+    y: -3
+    z: 0
 --- !u!114 &6735705291287771328
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -278,34 +278,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 453b54510a1b56e46b182d69c028ba8d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ConveyorBelt: 1
-  ConveyorBeltCenter:
+  IsConveyorBelt: 1
+  BeltCenter:
     x: 0
     y: 0.55
     z: -2
-  ConveyorBeltRotation:
+  BeltRotation:
     x: 0
     y: 0
     z: 0
-  ConveyorBeltSize:
+  BeltSize:
     x: 1.25
     y: 0.1
     z: 5
-  ConveyorBeltStrength: 7
-  Storage: 1
+  BeltStrength: 7
+  IsStorage: 1
   StorageCenter:
     x: 0
-    y: 0
-    z: 0
+    y: 1
+    z: -4
   StorageRotation:
     x: 0
     y: 0
     z: 0
   StorageSize:
-    x: 0
-    y: 0
-    z: 0
-  ItemSpawner: 0
+    x: 1.25
+    y: 1
+    z: 1
+  IsItemSpawner: 0
   ItemSpawnerPosition:
     x: 0
     y: 0

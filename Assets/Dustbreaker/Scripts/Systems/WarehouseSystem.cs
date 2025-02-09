@@ -11,6 +11,7 @@ using Unity.Transforms;
 namespace Dustbreaker
 {
 	[UpdateInGroup(typeof(BeforePhysicsSystemGroup))]
+	[UpdateBefore(typeof(SwitchPhysicsBodySystem))]
 	public partial struct WarehouseSystem : ISystem
 	{
 		private struct MoveEvent
@@ -71,13 +72,21 @@ namespace Dustbreaker
 				DeltaTime = SystemAPI.Time.DeltaTime,
 			}.Schedule(state.Dependency);
 
-			state.Dependency = new StorageJob
+			state.Dependency = new ConveyorStorageJob
 			{
 				CollisionWorld = collisionWorld,
 				StoreQueue = _storeQueue.AsParallelWriter(),
+				CollisionFilter = _collisionFilter
 			}.ScheduleParallel(state.Dependency);
 
-			// TODO: send to storage job (+ TBD event for mission validation / barter value)
+
+			state.Dependency = new StorageJob
+			{
+				StorageLookup = SystemAPI.GetComponentLookup<StorageComponent>(true),
+				SwitchToKinematicLookup = SystemAPI.GetComponentLookup<SwitchToKinematicFlag>(),
+				TransformLookup = SystemAPI.GetComponentLookup<LocalTransform>(),
+				StoreQueue = _storeQueue,
+			}.Schedule(state.Dependency);
 		}
 
 		[BurstCompile]
@@ -91,16 +100,14 @@ namespace Dustbreaker
 			{
 				// TODO: init transform values once
 				LocalTransform transform = LocalTransform.FromMatrix(math.mul(localTransform.ToMatrix(), new float4x4(conveyorBelt.Rotation, conveyorBelt.Center)));
-				quaternion rotation = transform.Rotation;
-				float3 position = transform.Position;
 				float3 impulse = transform.Forward() * conveyorBelt.Strength * -1f;
 
-				DrawUtilities.DrawBox(position, rotation, conveyorBelt.Size, new float4(1f, 0f, 0f, 1f));
+				DrawUtilities.DrawBox(transform.Position, transform.Rotation, conveyorBelt.Size, new float4(1f, 0f, 0f, 1f));
 
 				NativeList<ColliderCastHit> outHits = new NativeList<ColliderCastHit>(Allocator.Temp);
 				if (CollisionWorld.BoxCastAll(
-					position,
-					rotation, 
+					transform.Position,
+					transform.Rotation, 
 					conveyorBelt.Size / 2f, 
 					new float3(0f, 1f, 0f),
 					0.1f,
@@ -139,15 +146,62 @@ namespace Dustbreaker
 		}
 
 		[BurstCompile]
-		private partial struct StorageJob : IJobEntity
+		private partial struct ConveyorStorageJob : IJobEntity
 		{
 			[ReadOnly] public CollisionWorld CollisionWorld;
 			[WriteOnly] public NativeQueue<StoreEvent>.ParallelWriter StoreQueue;
+			public CollisionFilter CollisionFilter;
 
-			public void Execute(in StorageComponent storage, in LocalTransform localTransform, in LocationReference location)
+			public void Execute(in ConveyorStorageComponent conveyorStorage, in LocalTransform localTransform, in LocationReference location)
 			{
-				// TODO
-				// TODO: debug cast box
+				// TODO: init transform values once
+				LocalTransform transform = LocalTransform.FromMatrix(math.mul(localTransform.ToMatrix(), new float4x4(conveyorStorage.Rotation, conveyorStorage.Center)));
+
+				DrawUtilities.DrawBox(transform.Position, transform.Rotation, conveyorStorage.Size, new float4(0f, 1f, 0f, 1f));
+
+				NativeList<ColliderCastHit> outHits = new NativeList<ColliderCastHit>(Allocator.Temp);
+				if (CollisionWorld.BoxCastAll(
+					transform.Position,
+					transform.Rotation,
+					conveyorStorage.Size / 2f,
+					new float3(0f, 1f, 0f),
+					0.1f,
+					ref outHits,
+					CollisionFilter))
+				{
+					for (int i = 0; i < outHits.Length; i++)
+					{
+						StoreQueue.Enqueue(new StoreEvent { Entity = outHits[i].Entity, Location = location.Entity });
+					}
+				}
+				outHits.Dispose();
+			}
+		}
+
+		[BurstCompile]
+		private partial struct StorageJob : IJob
+		{
+			[ReadOnly] public ComponentLookup<StorageComponent> StorageLookup;
+			public ComponentLookup<SwitchToKinematicFlag> SwitchToKinematicLookup;
+			public ComponentLookup<LocalTransform> TransformLookup;
+			public NativeQueue<StoreEvent> StoreQueue;
+
+			public void Execute()
+			{
+				while (StoreQueue.Count > 0)
+				{
+					StoreEvent storeEvent = StoreQueue.Dequeue();
+
+					if (StorageLookup.TryGetComponent(storeEvent.Location, out StorageComponent storage))
+					{
+						// TODO/TBD: switch to no physics as well
+						SwitchToKinematicLookup.SetComponentEnabled(storeEvent.Entity, true);	
+						
+						LocalTransform transform = TransformLookup[storeEvent.Entity];
+						transform.Position = storage.Position;
+						TransformLookup[storeEvent.Entity] = transform;
+					}
+				}
 			}
 		}
 	}
