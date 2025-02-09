@@ -47,7 +47,7 @@ MonoBehaviour:
   GameConfig:
     TravelDistance: 75
   StreamingConfig:
-    StreamingRange: 384
+    StreamingRange: 0
     QuadrantSize: 128
   CharacterPrefab: {fileID: 1555240849038293811, guid: e95be3f6ef9cc8243994bdcda968a0e5, type: 3}
   ColonyPrefab: {fileID: 3491842725734692128, guid: 8d55f39caaed0c345b7e9669a4a2e56c, type: 3}

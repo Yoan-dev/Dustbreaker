@@ -279,53 +279,41 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ConveyorBelt: 1
+  ConveyorBeltCenter:
+    x: 0
+    y: 0.55
+    z: -2
+  ConveyorBeltRotation:
+    x: 0
+    y: 0
+    z: 0
+  ConveyorBeltSize:
+    x: 1.25
+    y: 0.1
+    z: 5
+  ConveyorBeltStrength: 7
   Storage: 1
+  StorageCenter:
+    x: 0
+    y: 0
+    z: 0
+  StorageRotation:
+    x: 0
+    y: 0
+    z: 0
+  StorageSize:
+    x: 0
+    y: 0
+    z: 0
   ItemSpawner: 0
-  ConveyorBeltComponent:
-    Transform:
-      rot:
-        value:
-          x: 0
-          y: 1
-          z: 0
-          w: 0
-      pos:
-        x: 0
-        y: 0.75
-        z: -2
-    Size:
-      x: 1.25
-      y: 0.5
-      z: 5
-    Strength: 7
-  StorageComponent:
-    Transform:
-      rot:
-        value:
-          x: 0
-          y: 0
-          z: 0
-          w: 0
-      pos:
-        x: 0
-        y: 0
-        z: 0
-    Size:
-      x: 0
-      y: 0
-      z: 0
-  ItemSpawnerComponent:
-    SpawnPoint:
-      rot:
-        value:
-          x: 0
-          y: 0
-          z: 0
-          w: 0
-      pos:
-        x: 0
-        y: 0
-        z: 0
+  ItemSpawnerPosition:
+    x: 0
+    y: 0
+    z: 0
+  ItemSpawnerRotation:
+    x: 0
+    y: 0
+    z: 0
 --- !u!114 &4568336074377188086
 MonoBehaviour:
   m_ObjectHideFlags: 0

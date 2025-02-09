@@ -90,10 +90,10 @@ namespace Dustbreaker
 			public void Execute(in ConveyorBeltComponent conveyorBelt, in LocalTransform localTransform)
 			{
 				// TODO: init transform values once
-				LocalTransform transform = LocalTransform.FromMatrix(math.mul(localTransform.ToMatrix(), new float4x4(conveyorBelt.Transform.rot, conveyorBelt.Transform.pos)));
+				LocalTransform transform = LocalTransform.FromMatrix(math.mul(localTransform.ToMatrix(), new float4x4(conveyorBelt.Rotation, conveyorBelt.Center)));
 				quaternion rotation = transform.Rotation;
 				float3 position = transform.Position;
-				float3 impulse = transform.Forward() * conveyorBelt.Strength;
+				float3 impulse = transform.Forward() * conveyorBelt.Strength * -1f;
 
 				DrawUtilities.DrawBox(position, rotation, conveyorBelt.Size, new float4(1f, 0f, 0f, 1f));
 

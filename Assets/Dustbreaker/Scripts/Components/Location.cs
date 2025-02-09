@@ -19,24 +19,24 @@ namespace Dustbreaker
 
 	public struct LocationTag : IComponentData { }
 
-	[Serializable]
 	public struct ConveyorBeltComponent : IComponentData
 	{
-		public RigidTransform Transform;
+		public quaternion Rotation;
+		public float3 Center;
 		public float3 Size;
 		public float Strength;
 	}
 
-	[Serializable]
 	public struct StorageComponent : IComponentData
 	{
-		public RigidTransform Transform;
+		public quaternion Rotation;
+		public float3 Position;
 		public float3 Size;
 	}
 
-	[Serializable]
 	public struct ItemSpawnerComponent : IComponentData
 	{
-		public RigidTransform SpawnPoint;
+		public quaternion Rotation;
+		public float3 Position;
 	}
 }
