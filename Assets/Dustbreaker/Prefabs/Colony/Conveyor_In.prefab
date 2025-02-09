@@ -297,7 +297,7 @@ MonoBehaviour:
       x: 1.25
       y: 0.5
       z: 5
-    Strength: 1
+    Strength: 7
   StorageComponent:
     Transform:
       rot:

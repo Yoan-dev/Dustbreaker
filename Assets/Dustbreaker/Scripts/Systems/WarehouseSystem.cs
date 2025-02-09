@@ -10,9 +10,7 @@ using Unity.Transforms;
 
 namespace Dustbreaker
 {
-	[UpdateInGroup(typeof(PhysicsSystemGroup))]
-	[UpdateAfter(typeof(PhysicsInitializeGroup))]
-	[UpdateBefore(typeof(PhysicsSimulationGroup))]
+	[UpdateInGroup(typeof(BeforePhysicsSystemGroup))]
 	public partial struct WarehouseSystem : ISystem
 	{
 		private struct MoveEvent
@@ -56,26 +54,26 @@ namespace Dustbreaker
 		[BurstCompile]
 		public void OnUpdate(ref SystemState state)
 		{
-			PhysicsWorldSingleton physicsWorldSingleton = SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW;
-			//state.EntityManager.CompleteDependencyBeforeRW<PhysicsWorldSingleton>();
+			CollisionWorld collisionWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>().CollisionWorld;
 
 			state.Dependency = new ConveyorBeltJob
 			{
-				CollisionWorld = physicsWorldSingleton.CollisionWorld,
+				CollisionWorld = collisionWorld,
 				MoveQueue = _moveQueue.AsParallelWriter(),
 				CollisionFilter = _collisionFilter
 			}.ScheduleParallel(state.Dependency);
 
 			state.Dependency = new ConveyorMoveJob
 			{
-				PhysicsWorld = physicsWorldSingleton.PhysicsWorld,
+				MassLookup = SystemAPI.GetComponentLookup<PhysicsMass>(true),
+				VelocityLookup = SystemAPI.GetComponentLookup<PhysicsVelocity>(),
 				MoveQueue = _moveQueue,
 				DeltaTime = SystemAPI.Time.DeltaTime,
 			}.Schedule(state.Dependency);
 
 			state.Dependency = new StorageJob
 			{
-				CollisionWorld = physicsWorldSingleton.CollisionWorld,
+				CollisionWorld = collisionWorld,
 				StoreQueue = _storeQueue.AsParallelWriter(),
 			}.ScheduleParallel(state.Dependency);
 
@@ -123,7 +121,8 @@ namespace Dustbreaker
 		[BurstCompile]
 		private partial struct ConveyorMoveJob : IJob
 		{
-			public PhysicsWorld PhysicsWorld;
+			[ReadOnly] public ComponentLookup<PhysicsMass> MassLookup;
+			public ComponentLookup<PhysicsVelocity> VelocityLookup;
 			public NativeQueue<MoveEvent> MoveQueue;
 			public float DeltaTime;
 
@@ -132,8 +131,9 @@ namespace Dustbreaker
 				while (MoveQueue.Count > 0)
 				{
 					MoveEvent moveEvent = MoveQueue.Dequeue();
-					int index = PhysicsWorld.GetRigidBodyIndex(moveEvent.Entity);
-					PhysicsWorld.ApplyLinearImpulse(index, moveEvent.Impulse * DeltaTime);
+					PhysicsVelocity velocity = VelocityLookup[moveEvent.Entity];
+					velocity.ApplyLinearImpulse(MassLookup[moveEvent.Entity], moveEvent.Impulse * DeltaTime);
+					VelocityLookup[moveEvent.Entity] = velocity;
 				}
 			}
 		}
