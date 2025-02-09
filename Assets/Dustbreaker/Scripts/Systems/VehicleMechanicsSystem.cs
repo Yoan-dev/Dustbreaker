@@ -13,13 +13,15 @@ using UnityEngine;
 namespace Dustbreaker
 {
 	[UpdateInGroup(typeof(PhysicsSystemGroup))]
-	[UpdateAfter(typeof(PhysicsInitializeGroup)), UpdateBefore(typeof(PhysicsSimulationGroup))]
+	[UpdateAfter(typeof(PhysicsInitializeGroup))]
+	[UpdateBefore(typeof(PhysicsSimulationGroup))]
 	public partial struct VehicleMechanicsSystem : ISystem
 	{
 		[BurstCompile]
 		public void OnCreate(ref SystemState state)
 		{
 			state.RequireForUpdate<VehicleConfiguration>();
+			state.RequireForUpdate<PhysicsWorldSingleton>();
 		}
 
 		[BurstCompile]
@@ -33,7 +35,7 @@ namespace Dustbreaker
 			// this sample makes direct modifications to impulses between PhysicsInitializeGroup and PhysicsSimulationGroup
 			// we thus use PhysicsWorldExtensions rather than modifying component data, since they have already been consumed by BuildPhysicsWorld
 			PhysicsWorld world = SystemAPI.GetSingletonRW<PhysicsWorldSingleton>().ValueRW.PhysicsWorld;
-			state.EntityManager.CompleteDependencyBeforeRW<PhysicsWorldSingleton>();
+			//state.EntityManager.CompleteDependencyBeforeRW<PhysicsWorldSingleton>();
 
 			// update each wheel
 			var commandBuffer = new EntityCommandBuffer(Allocator.TempJob);

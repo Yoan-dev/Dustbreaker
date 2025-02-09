@@ -14,6 +14,9 @@ namespace Dustbreaker
 		public bool Pilot;
 		public bool Deliver;
 
+		[Header("Usage")]
+		public bool InLocation;
+
 		public class Baker : Baker<InteractableAuthoring>
 		{
 			public override void Bake(InteractableAuthoring authoring)
@@ -39,6 +42,12 @@ namespace Dustbreaker
 				else if (authoring.Deliver)
 				{
 					AddComponent<DeliverTag>(entity);
+				}
+
+				if (authoring.InLocation)
+				{
+					// add in authoring
+					AddComponent<LocationReference>(entity);
 				}
 			}
 		}

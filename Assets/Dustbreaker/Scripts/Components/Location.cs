@@ -1,3 +1,4 @@
+using System;
 using Unity.Entities;
 using Unity.Mathematics;
 
@@ -17,4 +18,25 @@ namespace Dustbreaker
 	}
 
 	public struct LocationTag : IComponentData { }
+
+	[Serializable]
+	public struct ConveyorBeltComponent : IComponentData
+	{
+		public RigidTransform Transform;
+		public float3 Size;
+		public float Strength;
+	}
+
+	[Serializable]
+	public struct StorageComponent : IComponentData
+	{
+		public RigidTransform Transform;
+		public float3 Size;
+	}
+
+	[Serializable]
+	public struct ItemSpawnerComponent : IComponentData
+	{
+		public RigidTransform SpawnPoint;
+	}
 }

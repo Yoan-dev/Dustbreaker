@@ -1,5 +1,4 @@
 using Unity.Burst;
-using Unity.Burst.CompilerServices;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -49,7 +48,7 @@ namespace Dustbreaker
 				LocationSpawnEvent spawnEvent = _spawnQueue.Dequeue();
 				Entity entity = state.EntityManager.Instantiate(spawnEvent.Prefab);
 				state.EntityManager.SetComponentData(entity, spawnEvent.Transform);
-				state.EntityManager.AddComponentData(entity, new LocationReference { Entity = spawnEvent.Location });
+				state.EntityManager.SetComponentData(entity, new LocationReference { Entity = spawnEvent.Location });
 			}
 		}
 
